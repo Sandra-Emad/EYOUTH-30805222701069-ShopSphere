@@ -1,12 +1,10 @@
 import "dotenv/config";
 
-import createApp from "./app.js";
+import app from "./app.js";
 import connectMongoDB from "./config/mongodb.js";
 import prisma from "./config/prisma.js";
 
 const PORT = process.env.PORT || 5000;
-
-const app = createApp();
 
 const startServer = async () => {
   try {

@@ -2,10 +2,8 @@ process.env.NODE_ENV = "test";
 
 import request from "supertest";
 
-import createApp from "../../src/app.js";
+import app from "../../src/app.js";
 import prisma from "../../src/config/prisma.js";
-
-const app = createApp();
 
 describe("Registration API", () => {
   const testEmail = `test-${Date.now()}@example.com`;

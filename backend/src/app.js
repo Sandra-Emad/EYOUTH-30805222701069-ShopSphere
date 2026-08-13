@@ -2,30 +2,28 @@ import express from "express";
 import cors from "cors";
 
 import authRoutes from "./routes/auth.routes.js";
+import categoryRoutes from "./routes/category.routes.js";
 
-const createApp = () => {
-  const app = express();
+const app = express();
 
-  app.use(cors());
-  app.use(express.json());
+app.use(cors());
+app.use(express.json());
 
-  app.get("/", (req, res) => {
-    res.json({
-      message: "E-Commerce API is running",
-    });
+app.get("/", (req, res) => {
+  res.json({
+    message: "E-Commerce API is running",
   });
+});
 
-  app.get("/health", async (req, res) => {
-    res.json({
-      server: "ok",
-      postgresql: "connected",
-      mongodb: "connected",
-    });
+app.get("/health", async (req, res) => {
+  res.json({
+    server: "ok",
+    postgresql: "connected",
+    mongodb: "connected",
   });
+});
 
-  app.use("/api/auth", authRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/categories", categoryRoutes);
 
-  return app;
-};
-
-export default createApp;
+export default app;
