@@ -1,28 +1,28 @@
-const express = require("express");
-const cors = require("cors");
-require("dotenv").config();
+import "dotenv/config";
 
-const connectMongoDB = require("./config/mongodb");
-
-const app = express();
+import createApp from "./app.js";
+import connectMongoDB from "./config/mongodb.js";
+import prisma from "./config/prisma.js";
 
 const PORT = process.env.PORT || 5000;
 
-app.use(cors());
-app.use(express.json());
-
-app.get("/", (req, res) => {
-  res.json({
-    message: "E-Commerce API is running",
-  });
-});
+const app = createApp();
 
 const startServer = async () => {
-  await connectMongoDB();
+  try {
+    await connectMongoDB();
 
-  app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-  });
+    await prisma.$connect();
+
+    console.log("PostgreSQL connected successfully");
+
+    app.listen(PORT, () => {
+      console.log(`Server running on http://localhost:${PORT}`);
+    });
+  } catch (error) {
+    console.error("Server startup failed:", error.message);
+    process.exit(1);
+  }
 };
 
 startServer();
