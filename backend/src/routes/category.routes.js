@@ -15,12 +15,7 @@ import {
   updateCategorySchema,
 } from "../validators/category.validator.js";
 
-import { useTestDatabase } from "../middlewares/test-database.middleware.js";
-
 const router = express.Router();
-
-// Use test database for category integration tests
-router.use(useTestDatabase);
 
 router.get("/", getCategories);
 

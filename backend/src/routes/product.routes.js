@@ -15,17 +15,7 @@ import {
   updateProductSchema,
 } from "../validators/product.validator.js";
 
-import { useTestDatabase } from "../middlewares/test-database.middleware.js";
-
 const router = express.Router();
-
-router.use((req, res, next) => {
-  if (process.env.NODE_ENV === "test") {
-    return useTestDatabase(req, res, next);
-  }
-
-  next();
-});
 
 router.get("/", getProducts);
 

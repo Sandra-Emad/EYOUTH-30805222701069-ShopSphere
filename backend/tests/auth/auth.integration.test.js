@@ -15,7 +15,6 @@ describe("Registration API", () => {
       },
     });
 
-    await prisma.$disconnect();
   });
 
   test("should register a new user successfully", async () => {

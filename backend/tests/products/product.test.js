@@ -42,7 +42,6 @@ describe("Product API", () => {
       },
     });
 
-    await testPrisma.$disconnect();
   });
 
   test("should create a product successfully", async () => {

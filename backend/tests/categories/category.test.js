@@ -20,7 +20,6 @@ describe("Category API", () => {
       },
     });
 
-    await testPrisma.$disconnect();
   });
 
   test("should create a category successfully", async () => {
