@@ -3,18 +3,23 @@ process.env.NODE_ENV = "test";
 import request from "supertest";
 
 import app from "../../src/app.js";
-import prisma from "../../src/config/prisma.js";
+import testPrisma from "../../src/config/test-prisma.js";
 
 describe("Registration API", () => {
   const testEmail = `test-${Date.now()}@example.com`;
 
+  beforeAll(async () => {
+    await testPrisma.$connect();
+  });
+
   afterAll(async () => {
-    await prisma.user.deleteMany({
+    await testPrisma.user.deleteMany({
       where: {
         email: testEmail,
       },
     });
 
+    await testPrisma.$disconnect();
   });
 
   test("should register a new user successfully", async () => {
