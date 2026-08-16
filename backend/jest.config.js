@@ -3,10 +3,12 @@ export default {
 
   testMatch: ["**/tests/**/*.test.js"],
 
+  setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
+
   transform: {},
 
   transformIgnorePatterns: [
     "node_modules/",
-    "<rootDir>/src/generated/prisma/"
+    "<rootDir>/src/generated/prisma/",
   ],
 };

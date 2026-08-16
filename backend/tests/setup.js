@@ -1,5 +1,5 @@
-import testPrisma from "../src/config/test-prisma.js";
+import dotenv from "dotenv";
 
-afterAll(async () => {
-  await testPrisma.$disconnect();
+dotenv.config({
+  path: ".env",
 });
