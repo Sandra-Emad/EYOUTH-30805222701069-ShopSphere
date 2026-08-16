@@ -10,6 +10,10 @@ import {
 
 import validate from "../middlewares/validate.middleware.js";
 
+import authenticate, {
+  requireRole,
+} from "../middlewares/auth.middleware.js";
+
 import {
   createOrderSchema,
   updateOrderStatusSchema,
@@ -17,22 +21,59 @@ import {
 
 const router = express.Router();
 
-router.get("/", getOrders);
+/*
+|--------------------------------------------------------------------------
+| Orders
+|--------------------------------------------------------------------------
+| Customers:
+| - Create an order
+| - View an order
+|
+| Admin:
+| - View all orders
+| - Update order status
+| - Delete orders
+|--------------------------------------------------------------------------
+*/
 
-router.get("/:id", getOrder);
+// Get all orders - ADMIN ONLY
+router.get(
+  "/",
+  authenticate,
+  requireRole("ADMIN"),
+  getOrders
+);
 
+// Get one order - AUTHENTICATED USERS
+router.get(
+  "/:id",
+  authenticate,
+  getOrder
+);
+
+// Create order - AUTHENTICATED USERS
 router.post(
   "/",
+  authenticate,
   validate(createOrderSchema),
   createOrder
 );
 
+// Update order status - ADMIN ONLY
 router.put(
   "/:id/status",
+  authenticate,
+  requireRole("ADMIN"),
   validate(updateOrderStatusSchema),
   updateOrderStatus
 );
 
-router.delete("/:id", deleteOrder);
+// Delete order - ADMIN ONLY
+router.delete(
+  "/:id",
+  authenticate,
+  requireRole("ADMIN"),
+  deleteOrder
+);
 
 export default router;

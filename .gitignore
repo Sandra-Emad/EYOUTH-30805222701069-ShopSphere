@@ -29,4 +29,4 @@ backend/src/generated/
 
 # Temporary files
 *.tmp
-*.temp
+*.tempbackend/coverage/

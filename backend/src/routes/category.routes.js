@@ -1,14 +1,18 @@
 import express from "express";
 
 import {
+  createCategory,
   getCategories,
   getCategory,
-  createCategory,
   updateCategory,
   deleteCategory,
 } from "../controllers/category.controller.js";
 
 import validate from "../middlewares/validate.middleware.js";
+
+import authenticate, {
+  requireRole,
+} from "../middlewares/auth.middleware.js";
 
 import {
   createCategorySchema,
@@ -17,22 +21,39 @@ import {
 
 const router = express.Router();
 
-router.get("/", getCategories);
+// Public
+router.get(
+  "/",
+  getCategories
+);
 
-router.get("/:id", getCategory);
+router.get(
+  "/:id",
+  getCategory
+);
 
+// Admin only
 router.post(
   "/",
+  authenticate,
+  requireRole("ADMIN"),
   validate(createCategorySchema),
   createCategory
 );
 
 router.put(
   "/:id",
+  authenticate,
+  requireRole("ADMIN"),
   validate(updateCategorySchema),
   updateCategory
 );
 
-router.delete("/:id", deleteCategory);
+router.delete(
+  "/:id",
+  authenticate,
+  requireRole("ADMIN"),
+  deleteCategory
+);
 
 export default router;

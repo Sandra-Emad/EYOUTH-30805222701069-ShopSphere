@@ -1,6 +1,7 @@
 process.env.NODE_ENV = "test";
 
 import request from "supertest";
+import bcrypt from "bcryptjs";
 
 import app from "../../src/app.js";
 import testPrisma from "../../src/config/test-prisma.js";
@@ -11,23 +12,74 @@ describe("Order API", () => {
   let product;
   let orderId;
 
+  let userToken;
+  let adminToken;
+  let adminId;
+
   const userEmail = `order-test-${Date.now()}@example.com`;
+  const userPassword = "User12345";
+
+  const adminEmail = `order-admin-${Date.now()}@example.com`;
+  const adminPassword = "Admin12345";
+
   const categoryName = `Order Test Category ${Date.now()}`;
   const productName = `Order Test Product ${Date.now()}`;
 
   beforeAll(async () => {
     await testPrisma.$connect();
 
-    // Create test user
+    const hashedUserPassword = await bcrypt.hash(
+      userPassword,
+      12
+    );
+
     user = await testPrisma.user.create({
       data: {
         name: "Order Test User",
         email: userEmail,
-        password: "hashed-password",
+        password: hashedUserPassword,
+        role: "CUSTOMER",
       },
     });
 
-    // Create test category
+    const hashedAdminPassword = await bcrypt.hash(
+      adminPassword,
+      12
+    );
+
+    const admin = await testPrisma.user.create({
+      data: {
+        name: "Order Test Admin",
+        email: adminEmail,
+        password: hashedAdminPassword,
+        role: "ADMIN",
+      },
+    });
+
+    adminId = admin.id;
+
+    const userLoginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: userEmail,
+        password: userPassword,
+      });
+
+    expect(userLoginResponse.statusCode).toBe(200);
+
+    userToken = userLoginResponse.body.token;
+
+    const adminLoginResponse = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: adminEmail,
+        password: adminPassword,
+      });
+
+    expect(adminLoginResponse.statusCode).toBe(200);
+
+    adminToken = adminLoginResponse.body.token;
+
     category = await testPrisma.category.create({
       data: {
         name: categoryName,
@@ -35,7 +87,6 @@ describe("Order API", () => {
       },
     });
 
-    // Create test product
     product = await testPrisma.product.create({
       data: {
         name: productName,
@@ -77,11 +128,18 @@ describe("Order API", () => {
         id: user.id,
       },
     });
+
+    await testPrisma.user.deleteMany({
+      where: {
+        id: adminId,
+      },
+    });
   });
 
   test("should create an order successfully", async () => {
     const response = await request(app)
       .post("/api/orders")
+      .set("Authorization", `Bearer ${userToken}`)
       .send({
         userId: user.id,
         items: [
@@ -129,9 +187,9 @@ describe("Order API", () => {
   });
 
   test("should get all orders", async () => {
-    const response = await request(app).get(
-      "/api/orders"
-    );
+    const response = await request(app)
+      .get("/api/orders")
+      .set("Authorization", `Bearer ${adminToken}`);
 
     expect(response.statusCode).toBe(200);
 
@@ -145,9 +203,9 @@ describe("Order API", () => {
   });
 
   test("should get order by id", async () => {
-    const response = await request(app).get(
-      `/api/orders/${orderId}`
-    );
+    const response = await request(app)
+      .get(`/api/orders/${orderId}`)
+      .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(200);
 
@@ -159,6 +217,7 @@ describe("Order API", () => {
   test("should update order status", async () => {
     const response = await request(app)
       .put(`/api/orders/${orderId}/status`)
+      .set("Authorization", `Bearer ${adminToken}`)
       .send({
         status: "PROCESSING",
       });
@@ -177,6 +236,7 @@ describe("Order API", () => {
   test("should reject order for non-existing user", async () => {
     const response = await request(app)
       .post("/api/orders")
+      .set("Authorization", `Bearer ${userToken}`)
       .send({
         userId: 999999,
         items: [
@@ -197,6 +257,7 @@ describe("Order API", () => {
   test("should reject order for non-existing product", async () => {
     const response = await request(app)
       .post("/api/orders")
+      .set("Authorization", `Bearer ${userToken}`)
       .send({
         userId: user.id,
         items: [
@@ -217,6 +278,7 @@ describe("Order API", () => {
   test("should reject order when stock is insufficient", async () => {
     const response = await request(app)
       .post("/api/orders")
+      .set("Authorization", `Bearer ${userToken}`)
       .send({
         userId: user.id,
         items: [
@@ -237,6 +299,7 @@ describe("Order API", () => {
   test("should reject invalid order data", async () => {
     const response = await request(app)
       .post("/api/orders")
+      .set("Authorization", `Bearer ${userToken}`)
       .send({
         userId: user.id,
         items: [],
@@ -246,9 +309,9 @@ describe("Order API", () => {
   });
 
   test("should return 404 for non-existing order", async () => {
-    const response = await request(app).get(
-      "/api/orders/999999"
-    );
+    const response = await request(app)
+      .get("/api/orders/999999")
+      .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(404);
 
@@ -258,9 +321,9 @@ describe("Order API", () => {
   });
 
   test("should delete an order successfully", async () => {
-    const response = await request(app).delete(
-      `/api/orders/${orderId}`
-    );
+    const response = await request(app)
+      .delete(`/api/orders/${orderId}`)
+      .set("Authorization", `Bearer ${adminToken}`);
 
     expect(response.statusCode).toBe(200);
 
@@ -270,9 +333,9 @@ describe("Order API", () => {
   });
 
   test("should return 404 after deleting the order", async () => {
-    const response = await request(app).get(
-      `/api/orders/${orderId}`
-    );
+    const response = await request(app)
+      .get(`/api/orders/${orderId}`)
+      .set("Authorization", `Bearer ${userToken}`);
 
     expect(response.statusCode).toBe(404);
 

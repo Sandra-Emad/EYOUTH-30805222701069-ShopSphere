@@ -5,8 +5,12 @@ import request from "supertest";
 import app from "../../src/app.js";
 import testPrisma from "../../src/config/test-prisma.js";
 
-describe("Registration API", () => {
-  const testEmail = `test-${Date.now()}@example.com`;
+describe("Authentication API", () => {
+  const testEmail = `auth-test-${Date.now()}@example.com`;
+  const testPassword = "Password123";
+
+  let token;
+  let userId;
 
   beforeAll(async () => {
     await testPrisma.$connect();
@@ -18,17 +22,15 @@ describe("Registration API", () => {
         email: testEmail,
       },
     });
-
-    await testPrisma.$disconnect();
   });
 
   test("should register a new user successfully", async () => {
     const response = await request(app)
       .post("/api/auth/register")
       .send({
-        name: "Test User",
+        name: "Auth Test User",
         email: testEmail,
-        password: "Password123",
+        password: testPassword,
       });
 
     expect(response.statusCode).toBe(201);
@@ -38,11 +40,20 @@ describe("Registration API", () => {
     );
 
     expect(response.body.user).toHaveProperty("id");
-    expect(response.body.user.name).toBe("Test User");
+
+    userId = response.body.user.id;
+
+    expect(response.body.user.name).toBe(
+      "Auth Test User"
+    );
+
     expect(response.body.user.email).toBe(testEmail);
+
     expect(response.body.user.role).toBe("CUSTOMER");
 
-    expect(response.body.user).not.toHaveProperty("password");
+    expect(response.body.user).not.toHaveProperty(
+      "password"
+    );
   });
 
   test("should reject duplicate email", async () => {
@@ -51,13 +62,141 @@ describe("Registration API", () => {
       .send({
         name: "Another User",
         email: testEmail,
-        password: "Password123",
+        password: testPassword,
       });
 
     expect(response.statusCode).toBe(409);
 
     expect(response.body.message).toBe(
       "Email is already registered"
+    );
+  });
+
+  test("should login successfully with valid credentials", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: testEmail,
+        password: testPassword,
+      });
+
+    expect(response.statusCode).toBe(200);
+
+    expect(response.body.message).toBe(
+      "Login successful"
+    );
+
+    expect(response.body.token).toBeDefined();
+
+    expect(typeof response.body.token).toBe("string");
+
+    expect(response.body.user).toHaveProperty(
+      "id",
+      userId
+    );
+
+    expect(response.body.user.email).toBe(testEmail);
+
+    expect(response.body.user.role).toBe("CUSTOMER");
+
+    expect(response.body.user).not.toHaveProperty(
+      "password"
+    );
+
+    token = response.body.token;
+  });
+
+  test("should reject login with wrong password", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: testEmail,
+        password: "WrongPassword123",
+      });
+
+    expect(response.statusCode).toBe(401);
+
+    expect(response.body.message).toBe(
+      "Invalid email or password"
+    );
+  });
+
+  test("should reject login for non-existing email", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "does-not-exist@example.com",
+        password: testPassword,
+      });
+
+    expect(response.statusCode).toBe(401);
+
+    expect(response.body.message).toBe(
+      "Invalid email or password"
+    );
+  });
+
+  test("should reject login with invalid email format", async () => {
+    const response = await request(app)
+      .post("/api/auth/login")
+      .send({
+        email: "invalid-email",
+        password: testPassword,
+      });
+
+    expect(response.statusCode).toBe(400);
+
+    expect(response.body.message).toBe(
+      "Validation failed"
+    );
+  });
+
+  test("should reject access to /me without token", async () => {
+    const response = await request(app).get(
+      "/api/auth/me"
+    );
+
+    expect(response.statusCode).toBe(401);
+
+    expect(response.body.message).toBe(
+      "Authentication required"
+    );
+  });
+
+  test("should reject access to /me with invalid token", async () => {
+    const response = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", "Bearer invalid-token");
+
+    expect(response.statusCode).toBe(401);
+
+    expect(response.body.message).toBe(
+      "Invalid token"
+    );
+  });
+
+  test("should get current user with valid token", async () => {
+    const response = await request(app)
+      .get("/api/auth/me")
+      .set("Authorization", `Bearer ${token}`);
+
+    expect(response.statusCode).toBe(200);
+
+    expect(response.body.user).toHaveProperty(
+      "id",
+      userId
+    );
+
+    expect(response.body.user.name).toBe(
+      "Auth Test User"
+    );
+
+    expect(response.body.user.email).toBe(testEmail);
+
+    expect(response.body.user.role).toBe("CUSTOMER");
+
+    expect(response.body.user).not.toHaveProperty(
+      "password"
     );
   });
 });

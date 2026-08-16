@@ -21,3 +21,49 @@ export const registerSchema = Joi.object({
     "any.required": "Password is required",
   }),
 });
+
+export const loginSchema = Joi.object({
+  email: Joi.string().trim().email().required().messages({
+    "string.empty": "Email is required",
+    "string.email": "Please provide a valid email",
+    "any.required": "Email is required",
+  }),
+
+  password: Joi.string().required().messages({
+    "string.empty": "Password is required",
+    "any.required": "Password is required",
+  }),
+});
+
+export const updateProfileSchema = Joi.object({
+  name: Joi.string()
+    .trim()
+    .min(2)
+    .max(100)
+    .messages({
+      "string.empty": "Name cannot be empty",
+      "string.min": "Name must be at least 2 characters",
+      "string.max": "Name must not exceed 100 characters",
+    }),
+
+  email: Joi.string()
+    .trim()
+    .email()
+    .messages({
+      "string.empty": "Email cannot be empty",
+      "string.email": "Please provide a valid email",
+    }),
+
+  password: Joi.string()
+    .min(8)
+    .max(100)
+    .messages({
+      "string.empty": "Password cannot be empty",
+      "string.min": "Password must be at least 8 characters",
+      "string.max": "Password must not exceed 100 characters",
+    }),
+})
+  .min(1)
+  .messages({
+    "object.min": "At least one field is required",
+  });
