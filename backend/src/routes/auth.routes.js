@@ -7,8 +7,7 @@ import {
   updateMe,
 } from "../controllers/auth.controller.js";
 
-import validate from "../middlewares/validate.middleware.js";
-
+import validationMiddleware from "../middlewares/validation.middleware.js";
 import authenticate from "../middlewares/auth.middleware.js";
 
 import {
@@ -19,32 +18,40 @@ import {
 
 const router = express.Router();
 
-// Public
+/*
+|--------------------------------------------------------------------------
+| Public
+|--------------------------------------------------------------------------
+*/
+
 router.post(
   "/register",
-  validate(registerSchema),
+  validationMiddleware(registerSchema),
   register
 );
 
-// Public
 router.post(
   "/login",
-  validate(loginSchema),
+  validationMiddleware(loginSchema),
   login
 );
 
-// Protected
+/*
+|--------------------------------------------------------------------------
+| Protected
+|--------------------------------------------------------------------------
+*/
+
 router.get(
   "/me",
   authenticate,
   getMe
 );
 
-// Protected
 router.put(
   "/me",
   authenticate,
-  validate(updateProfileSchema),
+  validationMiddleware(updateProfileSchema),
   updateMe
 );
 

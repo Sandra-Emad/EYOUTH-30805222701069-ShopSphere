@@ -1,88 +1,84 @@
 import express from "express";
 
 import {
-  createProduct,
-  getProducts,
-  getProduct,
-  updateProduct,
-  deleteProduct,
+  create,
+  getAll,
+  getOne,
+  update,
+  remove,
 } from "../controllers/product.controller.js";
 
-import validate from "../middlewares/validate.middleware.js";
-
-import authenticate, {
-  requireRole,
-} from "../middlewares/auth.middleware.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
+import roleMiddleware from "../middlewares/role.middleware.js";
+import validationMiddleware from "../middlewares/validation.middleware.js";
 
 import {
   createProductSchema,
   updateProductSchema,
+  productQuerySchema,
 } from "../validators/product.validator.js";
 
 const router = express.Router();
 
 /*
 |--------------------------------------------------------------------------
-| Public Product Routes
+| Public Routes
 |--------------------------------------------------------------------------
 */
 
-// Get products
-//
-// Supported query parameters:
-//
-// ?search=iphone
-// ?categoryId=1
-// ?sortBy=name
-// ?sortBy=price
-// ?sortOrder=asc
-// ?sortOrder=desc
-// ?page=1
-// ?limit=10
-//
-// Example:
-// /api/products?search=phone&categoryId=1&sortBy=price&sortOrder=asc&page=1&limit=10
+// Get all products
 router.get(
   "/",
-  getProducts
+  validationMiddleware(productQuerySchema, "query"),
+  getAll
 );
 
-// Get single product
+// Get one product
 router.get(
   "/:id",
-  getProduct
+  getOne
 );
 
 /*
 |--------------------------------------------------------------------------
-| Admin Product Routes
+| Admin Product CRUD
 |--------------------------------------------------------------------------
 */
 
 // Create product
 router.post(
   "/",
-  authenticate,
-  requireRole("ADMIN"),
-  validate(createProductSchema),
-  createProduct
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  validationMiddleware(createProductSchema, "body"),
+  create
 );
 
 // Update product
+// IMPORTANT: tests use PUT
 router.put(
   "/:id",
-  authenticate,
-  requireRole("ADMIN"),
-  validate(updateProductSchema),
-  updateProduct
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  validationMiddleware(updateProductSchema, "body"),
+  update
+);
+
+// Keep PATCH support as well
+router.patch(
+  "/:id",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  validationMiddleware(updateProductSchema, "body"),
+  update
 );
 
 // Delete product
 router.delete(
   "/:id",
-  authenticate,
-  requireRole("ADMIN"),
-  deleteProduct
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  remove
 );
 
 export default router;

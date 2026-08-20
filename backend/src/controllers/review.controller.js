@@ -1,51 +1,101 @@
 import reviewService from "../services/review.service.js";
 
-export const getReviews = async (req, res) => {
+export const getByProduct = async (req, res) => {
   try {
     const result = await reviewService.listReviews(
       req.params.productId,
       req.database
     );
 
-    res.status(200).json(result);
+    return res.status(200).json(result);
   } catch (error) {
-    res.status(error.statusCode || 500).json({
-      message: error.message || "Failed to get reviews",
+    console.error(
+      "Get reviews error:",
+      error.message
+    );
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to get reviews",
     });
   }
 };
 
-export const addReview = async (req, res) => {
+export const create = async (req, res) => {
   try {
-    const review = await reviewService.createReview(
-      req.params.productId,
-      req.user.userId,
-      req.body,
-      req.database
-    );
+    const review =
+      await reviewService.createReview(
+        req.params.productId,
+        req.user.userId,
+        req.body,
+        req.database
+      );
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Review added successfully",
       review,
     });
   } catch (error) {
-    res.status(error.statusCode || 500).json({
-      message: error.message || "Failed to add review",
-    });
-  }
-};
-
-export const deleteReview = async (req, res) => {
-  try {
-    const result = await reviewService.deleteReview(
-      req.params.id,
-      req.user.userId
+    console.error(
+      "Create review error:",
+      error.message
     );
 
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(error.statusCode || 500).json({
-      message: error.message || "Failed to delete review",
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to create review",
     });
   }
 };
+
+export const update = async (req, res) => {
+  try {
+    const error = new Error(
+      "Review update is not supported"
+    );
+
+    error.statusCode = 501;
+
+    throw error;
+  } catch (error) {
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to update review",
+    });
+  }
+};
+
+export const remove = async (req, res) => {
+  try {
+    const result =
+      await reviewService.deleteReview(
+        req.params.id ||
+          req.params.reviewId,
+        req.user.userId
+      );
+
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error(
+      "Delete review error:",
+      error.message
+    );
+
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message:
+        error.message ||
+        "Failed to delete review",
+    });
+  }
+};
+
+export const getReviews = getByProduct;
+export const addReview = create;
+export const deleteReview = remove;

@@ -4,10 +4,14 @@ const getDatabase = (req) => {
   return req.database;
 };
 
+const getAuthenticatedUserId = (req) => {
+  return req.user.userId;
+};
+
 export const get = async (req, res) => {
   try {
     const cart = await cartService.getCart(
-      req.user.id,
+      getAuthenticatedUserId(req),
       getDatabase(req)
     );
 
@@ -30,7 +34,7 @@ export const add = async (req, res) => {
     const { productId, quantity } = req.body;
 
     const cart = await cartService.addToCart(
-      req.user.id,
+      getAuthenticatedUserId(req),
       productId,
       quantity,
       getDatabase(req)
@@ -45,7 +49,8 @@ export const add = async (req, res) => {
 
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: error.message || "Failed to add item to cart",
+      message:
+        error.message || "Failed to add item to cart",
     });
   }
 };
@@ -56,7 +61,7 @@ export const update = async (req, res) => {
     const { quantity } = req.body;
 
     const cart = await cartService.updateCartItem(
-      req.user.id,
+      getAuthenticatedUserId(req),
       productId,
       quantity,
       getDatabase(req)
@@ -71,7 +76,8 @@ export const update = async (req, res) => {
 
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: error.message || "Failed to update cart item",
+      message:
+        error.message || "Failed to update cart item",
     });
   }
 };
@@ -81,7 +87,7 @@ export const remove = async (req, res) => {
     const { productId } = req.params;
 
     const cart = await cartService.removeFromCart(
-      req.user.id,
+      getAuthenticatedUserId(req),
       productId,
       getDatabase(req)
     );
@@ -91,11 +97,15 @@ export const remove = async (req, res) => {
       cart,
     });
   } catch (error) {
-    console.error("Remove cart item error:", error.message);
+    console.error(
+      "Remove cart item error:",
+      error.message
+    );
 
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: error.message || "Failed to remove cart item",
+      message:
+        error.message || "Failed to remove cart item",
     });
   }
 };
@@ -103,7 +113,7 @@ export const remove = async (req, res) => {
 export const clear = async (req, res) => {
   try {
     const cart = await cartService.clearCart(
-      req.user.id,
+      getAuthenticatedUserId(req),
       getDatabase(req)
     );
 
@@ -116,7 +126,8 @@ export const clear = async (req, res) => {
 
     return res.status(error.statusCode || 500).json({
       success: false,
-      message: error.message || "Failed to clear cart",
+      message:
+        error.message || "Failed to clear cart",
     });
   }
 };

@@ -9,25 +9,81 @@ import {
 } from "../controllers/cart.controller.js";
 
 import authMiddleware from "../middlewares/auth.middleware.js";
+import validationMiddleware from "../middlewares/validation.middleware.js";
+
+import {
+  addToCartSchema,
+  updateCartSchema,
+  cartProductParamsSchema,
+} from "../validators/cart.validator.js";
 
 const router = express.Router();
 
-// All cart routes require authentication
+/*
+|--------------------------------------------------------------------------
+| Authentication
+|--------------------------------------------------------------------------
+*/
+
 router.use(authMiddleware);
 
-// GET /api/cart
+/*
+|--------------------------------------------------------------------------
+| Get Cart
+|--------------------------------------------------------------------------
+*/
+
 router.get("/", get);
 
-// POST /api/cart/items
-router.post("/items", add);
+/*
+|--------------------------------------------------------------------------
+| Add Product
+|--------------------------------------------------------------------------
+*/
 
-// PATCH /api/cart/items/:productId
-router.patch("/items/:productId", update);
+router.post(
+  "/items",
+  validationMiddleware(addToCartSchema),
+  add
+);
 
-// DELETE /api/cart/items/:productId
-router.delete("/items/:productId", remove);
+/*
+|--------------------------------------------------------------------------
+| Update Quantity
+|--------------------------------------------------------------------------
+*/
 
-// DELETE /api/cart
+router.patch(
+  "/items/:productId",
+  validationMiddleware(
+    cartProductParamsSchema,
+    "params"
+  ),
+  validationMiddleware(updateCartSchema),
+  update
+);
+
+/*
+|--------------------------------------------------------------------------
+| Remove Product
+|--------------------------------------------------------------------------
+*/
+
+router.delete(
+  "/items/:productId",
+  validationMiddleware(
+    cartProductParamsSchema,
+    "params"
+  ),
+  remove
+);
+
+/*
+|--------------------------------------------------------------------------
+| Clear Cart
+|--------------------------------------------------------------------------
+*/
+
 router.delete("/", clear);
 
 export default router;

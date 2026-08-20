@@ -1,5 +1,11 @@
 import prisma from "../config/prisma.js";
 
+/*
+|--------------------------------------------------------------------------
+| Helpers
+|--------------------------------------------------------------------------
+*/
+
 const normalizeProduct = (product) => {
   if (!product) {
     return product;
@@ -7,11 +13,30 @@ const normalizeProduct = (product) => {
 
   return {
     ...product,
-    price: product.price?.toString(),
+    price:
+      product.price !== undefined &&
+      product.price !== null
+        ? product.price.toString()
+        : product.price,
   };
 };
 
-const getAllProducts = async (
+const createError = (
+  message,
+  statusCode = 400
+) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+};
+
+/*
+|--------------------------------------------------------------------------
+| Get All Products
+|--------------------------------------------------------------------------
+*/
+
+export const getAllProducts = async (
   database = prisma,
   {
     search = "",
@@ -22,13 +47,18 @@ const getAllProducts = async (
     limit = 10,
   } = {}
 ) => {
-  const safePage = Math.max(Number(page) || 1, 1);
+  const safePage = Math.max(
+    Number(page) || 1,
+    1
+  );
+
   const safeLimit = Math.min(
     Math.max(Number(limit) || 10, 1),
     100
   );
 
-  const skip = (safePage - 1) * safeLimit;
+  const skip =
+    (safePage - 1) * safeLimit;
 
   const allowedSortFields = {
     name: "name",
@@ -37,112 +67,179 @@ const getAllProducts = async (
   };
 
   const orderField =
-    allowedSortFields[sortBy] || "createdAt";
+    allowedSortFields[sortBy] ||
+    "createdAt";
 
   const orderDirection =
-    sortOrder === "asc" ? "asc" : "desc";
+    sortOrder === "asc"
+      ? "asc"
+      : "desc";
 
   const where = {};
 
-  if (search && search.trim()) {
+  /*
+   * Search
+   */
+
+  if (
+    typeof search === "string" &&
+    search.trim()
+  ) {
+    const searchValue = search.trim();
+
     where.OR = [
       {
         name: {
-          contains: search.trim(),
+          contains: searchValue,
           mode: "insensitive",
         },
       },
       {
         description: {
-          contains: search.trim(),
+          contains: searchValue,
           mode: "insensitive",
         },
       },
     ];
   }
 
-  if (categoryId !== undefined && categoryId !== "") {
-    const parsedCategoryId = Number(categoryId);
+  /*
+   * Category filter
+   */
 
-    if (!Number.isInteger(parsedCategoryId)) {
-      const error = new Error(
-        "Category ID must be a valid number"
+  if (
+    categoryId !== undefined &&
+    categoryId !== ""
+  ) {
+    const parsedCategoryId =
+      Number(categoryId);
+
+    if (
+      !Number.isInteger(parsedCategoryId) ||
+      parsedCategoryId <= 0
+    ) {
+      throw createError(
+        "Category ID must be a valid number",
+        400
       );
-
-      error.statusCode = 400;
-      throw error;
     }
 
     where.categoryId = parsedCategoryId;
   }
 
-  const [products, total] = await Promise.all([
-    database.product.findMany({
-      where,
-      include: {
-        category: true,
-      },
-      orderBy: {
-        [orderField]: orderDirection,
-      },
-      skip,
-      take: safeLimit,
-    }),
+  /*
+   * Query
+   */
 
-    database.product.count({
-      where,
-    }),
-  ]);
+  const [products, total] =
+    await Promise.all([
+      database.product.findMany({
+        where,
+        include: {
+          category: true,
+        },
+        orderBy: {
+          [orderField]: orderDirection,
+        },
+        skip,
+        take: safeLimit,
+      }),
+
+      database.product.count({
+        where,
+      }),
+    ]);
 
   const totalPages =
     total === 0
       ? 0
-      : Math.ceil(total / safeLimit);
+      : Math.ceil(
+          total / safeLimit
+        );
 
   return {
-    products: products.map(normalizeProduct),
+    products:
+      products.map(normalizeProduct),
+
     pagination: {
       page: safePage,
       limit: safeLimit,
       total,
       totalPages,
-      hasNextPage: safePage < totalPages,
-      hasPreviousPage: safePage > 1,
+
+      hasNextPage:
+        safePage < totalPages,
+
+      hasPreviousPage:
+        safePage > 1,
     },
   };
 };
 
-const getProductById = async (
+/*
+|--------------------------------------------------------------------------
+| Compatibility Alias
+|--------------------------------------------------------------------------
+|
+| Older tests/controllers use getProducts.
+| Keep both names available.
+|
+|--------------------------------------------------------------------------
+*/
+
+export const getProducts =
+  getAllProducts;
+
+/*
+|--------------------------------------------------------------------------
+| Get Product By ID
+|--------------------------------------------------------------------------
+*/
+
+export const getProductById = async (
   id,
   database = prisma
 ) => {
   const productId = Number(id);
 
-  if (!Number.isInteger(productId)) {
-    const error = new Error("Invalid product ID");
-    error.statusCode = 400;
-    throw error;
+  if (
+    !Number.isInteger(productId) ||
+    productId <= 0
+  ) {
+    throw createError(
+      "Invalid product ID",
+      400
+    );
   }
 
-  const product = await database.product.findUnique({
-    where: {
-      id: productId,
-    },
-    include: {
-      category: true,
-    },
-  });
+  const product =
+    await database.product.findUnique({
+      where: {
+        id: productId,
+      },
+
+      include: {
+        category: true,
+      },
+    });
 
   if (!product) {
-    const error = new Error("Product not found");
-    error.statusCode = 404;
-    throw error;
+    throw createError(
+      "Product not found",
+      404
+    );
   }
 
   return normalizeProduct(product);
 };
 
-const createProduct = async (
+/*
+|--------------------------------------------------------------------------
+| Create Product
+|--------------------------------------------------------------------------
+*/
+
+export const createProduct = async (
   {
     name,
     description,
@@ -153,160 +250,100 @@ const createProduct = async (
   },
   database = prisma
 ) => {
+  if (
+    typeof name !== "string" ||
+    !name.trim()
+  ) {
+    throw createError(
+      "Product name is required",
+      400
+    );
+  }
+
+  const normalizedName =
+    name.trim();
+
+  const parsedCategoryId =
+    Number(categoryId);
+
+  if (
+    !Number.isInteger(
+      parsedCategoryId
+    ) ||
+    parsedCategoryId <= 0
+  ) {
+    throw createError(
+      "Category ID must be a valid number",
+      400
+    );
+  }
+
+  /*
+   * Check duplicate product
+   */
+
   const existingProduct =
     await database.product.findFirst({
       where: {
         name: {
-          equals: name.trim(),
+          equals: normalizedName,
           mode: "insensitive",
         },
       },
     });
 
   if (existingProduct) {
-    const error = new Error("Product already exists");
-    error.statusCode = 409;
-    throw error;
+    throw createError(
+      "Product already exists",
+      409
+    );
   }
+
+  /*
+   * Check category
+   */
 
   const category =
     await database.category.findUnique({
       where: {
-        id: Number(categoryId),
+        id: parsedCategoryId,
       },
     });
 
   if (!category) {
-    const error = new Error("Category not found");
-    error.statusCode = 404;
-    throw error;
+    throw createError(
+      "Category not found",
+      404
+    );
   }
 
-  const product = await database.product.create({
-    data: {
-      name: name.trim(),
-      description:
-        description?.trim() || null,
-      price,
-      stock: Number(stock) || 0,
-      imageUrl: imageUrl || null,
-      categoryId: Number(categoryId),
-    },
-    include: {
-      category: true,
-    },
-  });
-
-  return normalizeProduct(product);
-};
-
-const updateProduct = async (
-  id,
-  data,
-  database = prisma
-) => {
-  const productId = Number(id);
-
-  if (!Number.isInteger(productId)) {
-    const error = new Error("Invalid product ID");
-    error.statusCode = 400;
-    throw error;
-  }
-
-  const existingProduct =
-    await database.product.findUnique({
-      where: {
-        id: productId,
-      },
-    });
-
-  if (!existingProduct) {
-    const error = new Error("Product not found");
-    error.statusCode = 404;
-    throw error;
-  }
-
-  if (
-    data.name &&
-    data.name.trim().toLowerCase() !==
-      existingProduct.name.toLowerCase()
-  ) {
-    const duplicate =
-      await database.product.findFirst({
-        where: {
-          name: {
-            equals: data.name.trim(),
-            mode: "insensitive",
-          },
-          NOT: {
-            id: productId,
-          },
-        },
-      });
-
-    if (duplicate) {
-      const error = new Error(
-        "Product already exists"
-      );
-
-      error.statusCode = 409;
-      throw error;
-    }
-  }
-
-  if (data.categoryId !== undefined) {
-    const category =
-      await database.category.findUnique({
-        where: {
-          id: Number(data.categoryId),
-        },
-      });
-
-    if (!category) {
-      const error = new Error(
-        "Category not found"
-      );
-
-      error.statusCode = 404;
-      throw error;
-    }
-  }
-
-  const updateData = {};
-
-  if (data.name !== undefined) {
-    updateData.name = data.name.trim();
-  }
-
-  if (data.description !== undefined) {
-    updateData.description =
-      data.description?.trim() || null;
-  }
-
-  if (data.price !== undefined) {
-    updateData.price = data.price;
-  }
-
-  if (data.stock !== undefined) {
-    updateData.stock = Number(data.stock);
-  }
-
-  if (data.imageUrl !== undefined) {
-    updateData.imageUrl =
-      data.imageUrl || null;
-  }
-
-  if (data.categoryId !== undefined) {
-    updateData.categoryId =
-      Number(data.categoryId);
-  }
+  /*
+   * Create
+   */
 
   const product =
-    await database.product.update({
-      where: {
-        id: productId,
+    await database.product.create({
+      data: {
+        name: normalizedName,
+
+        description:
+          typeof description ===
+          "string"
+            ? description.trim() || null
+            : null,
+
+        price,
+
+        stock:
+          Number(stock) || 0,
+
+        imageUrl:
+          imageUrl || null,
+
+        categoryId:
+          parsedCategoryId,
       },
-      data: updateData,
+
       include: {
         category: true,
       },
@@ -315,16 +352,27 @@ const updateProduct = async (
   return normalizeProduct(product);
 };
 
-const deleteProduct = async (
+/*
+|--------------------------------------------------------------------------
+| Update Product
+|--------------------------------------------------------------------------
+*/
+
+export const updateProduct = async (
   id,
+  data,
   database = prisma
 ) => {
   const productId = Number(id);
 
-  if (!Number.isInteger(productId)) {
-    const error = new Error("Invalid product ID");
-    error.statusCode = 400;
-    throw error;
+  if (
+    !Number.isInteger(productId) ||
+    productId <= 0
+  ) {
+    throw createError(
+      "Invalid product ID",
+      400
+    );
   }
 
   const existingProduct =
@@ -335,9 +383,184 @@ const deleteProduct = async (
     });
 
   if (!existingProduct) {
-    const error = new Error("Product not found");
-    error.statusCode = 404;
-    throw error;
+    throw createError(
+      "Product not found",
+      404
+    );
+  }
+
+  /*
+   * Duplicate name check
+   */
+
+  if (
+    data.name !== undefined &&
+    typeof data.name === "string" &&
+    data.name.trim().toLowerCase() !==
+      existingProduct.name
+        .toLowerCase()
+  ) {
+    const duplicate =
+      await database.product.findFirst({
+        where: {
+          name: {
+            equals: data.name.trim(),
+            mode: "insensitive",
+          },
+
+          NOT: {
+            id: productId,
+          },
+        },
+      });
+
+    if (duplicate) {
+      throw createError(
+        "Product already exists",
+        409
+      );
+    }
+  }
+
+  /*
+   * Category check
+   */
+
+  if (
+    data.categoryId !== undefined
+  ) {
+    const parsedCategoryId =
+      Number(data.categoryId);
+
+    if (
+      !Number.isInteger(
+        parsedCategoryId
+      ) ||
+      parsedCategoryId <= 0
+    ) {
+      throw createError(
+        "Category ID must be a valid number",
+        400
+      );
+    }
+
+    const category =
+      await database.category.findUnique({
+        where: {
+          id: parsedCategoryId,
+        },
+      });
+
+    if (!category) {
+      throw createError(
+        "Category not found",
+        404
+      );
+    }
+  }
+
+  /*
+   * Build update data
+   */
+
+  const updateData = {};
+
+  if (data.name !== undefined) {
+    updateData.name =
+      typeof data.name === "string"
+        ? data.name.trim()
+        : data.name;
+  }
+
+  if (
+    data.description !==
+    undefined
+  ) {
+    updateData.description =
+      typeof data.description ===
+      "string"
+        ? data.description.trim() ||
+          null
+        : null;
+  }
+
+  if (data.price !== undefined) {
+    updateData.price = data.price;
+  }
+
+  if (data.stock !== undefined) {
+    updateData.stock =
+      Number(data.stock);
+  }
+
+  if (
+    data.imageUrl !== undefined
+  ) {
+    updateData.imageUrl =
+      data.imageUrl || null;
+  }
+
+  if (
+    data.categoryId !== undefined
+  ) {
+    updateData.categoryId =
+      Number(data.categoryId);
+  }
+
+  /*
+   * Update
+   */
+
+  const product =
+    await database.product.update({
+      where: {
+        id: productId,
+      },
+
+      data: updateData,
+
+      include: {
+        category: true,
+      },
+    });
+
+  return normalizeProduct(product);
+};
+
+/*
+|--------------------------------------------------------------------------
+| Delete Product
+|--------------------------------------------------------------------------
+*/
+
+export const deleteProduct = async (
+  id,
+  database = prisma
+) => {
+  const productId = Number(id);
+
+  if (
+    !Number.isInteger(productId) ||
+    productId <= 0
+  ) {
+    throw createError(
+      "Invalid product ID",
+      400
+    );
+  }
+
+  const existingProduct =
+    await database.product.findUnique({
+      where: {
+        id: productId,
+      },
+    });
+
+  if (!existingProduct) {
+    throw createError(
+      "Product not found",
+      404
+    );
   }
 
   await database.product.delete({
@@ -347,12 +570,25 @@ const deleteProduct = async (
   });
 
   return {
-    message: "Product deleted successfully",
+    message:
+      "Product deleted successfully",
   };
 };
 
+/*
+|--------------------------------------------------------------------------
+| Default Export
+|--------------------------------------------------------------------------
+|
+| Keep default export for controllers/services
+| that already use productService.xxx
+|
+|--------------------------------------------------------------------------
+*/
+
 export default {
   getAllProducts,
+  getProducts,
   getProductById,
   createProduct,
   updateProduct,

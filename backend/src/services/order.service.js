@@ -22,8 +22,19 @@ const getAllOrders = async (database = prisma) => {
   });
 };
 
-const getOrderById = async (id, database = prisma) => {
+const getOrderById = async (
+  id,
+  database = prisma,
+  requestingUserId = null,
+  requestingUserRole = null
+) => {
   const orderId = Number(id);
+
+  if (!Number.isInteger(orderId)) {
+    const error = new Error("Invalid order ID");
+    error.statusCode = 400;
+    throw error;
+  }
 
   const order = await database.order.findUnique({
     where: {
@@ -51,6 +62,21 @@ const getOrderById = async (id, database = prisma) => {
     throw error;
   }
 
+  if (requestingUserRole !== "ADMIN") {
+    const parsedUserId = Number(requestingUserId);
+
+    if (
+      !Number.isInteger(parsedUserId) ||
+      order.userId !== parsedUserId
+    ) {
+      const error = new Error(
+        "You are not allowed to view this order"
+      );
+      error.statusCode = 403;
+      throw error;
+    }
+  }
+
   return order;
 };
 
@@ -59,6 +85,20 @@ const createOrder = async (
   database = prisma
 ) => {
   const parsedUserId = Number(userId);
+
+  if (!Number.isInteger(parsedUserId)) {
+    const error = new Error("Invalid user ID");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!Array.isArray(items) || items.length === 0) {
+    const error = new Error(
+      "Order must contain at least one item"
+    );
+    error.statusCode = 400;
+    throw error;
+  }
 
   const user = await database.user.findUnique({
     where: {
@@ -72,17 +112,63 @@ const createOrder = async (
     throw error;
   }
 
-  if (!Array.isArray(items) || items.length === 0) {
-    const error = new Error(
-      "Order must contain at least one item"
+  /*
+   * Validate and normalize all order items first.
+   */
+  const normalizedItems = items.map((item) => {
+    const productId = Number(item.productId);
+    const quantity = Number(item.quantity);
+
+    if (!Number.isInteger(productId)) {
+      const error = new Error("Invalid product ID");
+      error.statusCode = 400;
+      throw error;
+    }
+
+    if (
+      !Number.isInteger(quantity) ||
+      quantity <= 0
+    ) {
+      const error = new Error(
+        "Product quantity must be a positive integer"
+      );
+      error.statusCode = 400;
+      throw error;
+    }
+
+    return {
+      productId,
+      quantity,
+    };
+  });
+
+  /*
+   * Aggregate duplicate product IDs.
+   *
+   * Example:
+   * [
+   *   { productId: 1, quantity: 2 },
+   *   { productId: 1, quantity: 3 }
+   * ]
+   *
+   * becomes:
+   * product 1 => quantity 5
+   */
+  const quantityByProduct = new Map();
+
+  for (const item of normalizedItems) {
+    const currentQuantity =
+      quantityByProduct.get(item.productId) || 0;
+
+    quantityByProduct.set(
+      item.productId,
+      currentQuantity + item.quantity
     );
-    error.statusCode = 400;
-    throw error;
   }
 
-  const productIds = items.map((item) =>
-    Number(item.productId)
-  );
+  const productIds = [
+    ...quantityByProduct.keys(),
+  ];
 
   const products = await database.product.findMany({
     where: {
@@ -93,25 +179,16 @@ const createOrder = async (
   });
 
   const productMap = new Map(
-    products.map((product) => [product.id, product])
+    products.map((product) => [
+      product.id,
+      product,
+    ])
   );
 
+  /*
+   * Validate every requested product and its stock.
+   */
   for (const productId of productIds) {
-    if (!productMap.has(productId)) {
-      const error = new Error(
-        `Product with id ${productId} not found`
-      );
-      error.statusCode = 404;
-      throw error;
-    }
-  }
-
-  let totalAmount = 0;
-
-  const orderItems = items.map((item) => {
-    const productId = Number(item.productId);
-    const quantity = Number(item.quantity);
-
     const product = productMap.get(productId);
 
     if (!product) {
@@ -122,38 +199,91 @@ const createOrder = async (
       throw error;
     }
 
-    if (
-      quantity <= 0 ||
-      !Number.isInteger(quantity)
-    ) {
-      const error = new Error(
-        "Product quantity must be a positive integer"
-      );
-      error.statusCode = 400;
-      throw error;
-    }
+    const requestedQuantity =
+      quantityByProduct.get(productId);
 
-    if (product.stock < quantity) {
+    if (product.stock < requestedQuantity) {
       const error = new Error(
         `Insufficient stock for product: ${product.name}`
       );
-      error.statusCode = 409;
+
+      // The API contract expects 400 for insufficient stock.
+      error.statusCode = 400;
+
       throw error;
     }
+  }
+
+  /*
+   * Calculate total and prepare OrderItem data.
+   *
+   * Price is taken from the database, never from
+   * the client request.
+   */
+  let totalAmount = 0;
+
+  const orderItems = normalizedItems.map((item) => {
+    const product = productMap.get(item.productId);
 
     const price = Number(product.price);
 
-    totalAmount += price * quantity;
+    totalAmount += price * item.quantity;
 
     return {
-      productId,
-      quantity,
+      productId: item.productId,
+      quantity: item.quantity,
       price: product.price,
     };
   });
 
+  /*
+   * Create the order and decrease stock atomically.
+   */
   const order = await database.$transaction(
     async (tx) => {
+      /*
+       * Re-check stock inside the transaction before
+       * changing anything.
+       *
+       * This protects against stock changes between
+       * the initial validation and the transaction.
+       */
+      for (const productId of productIds) {
+        const requestedQuantity =
+          quantityByProduct.get(productId);
+
+        const currentProduct =
+          await tx.product.findUnique({
+            where: {
+              id: productId,
+            },
+          });
+
+        if (!currentProduct) {
+          const error = new Error(
+            `Product with id ${productId} not found`
+          );
+          error.statusCode = 404;
+          throw error;
+        }
+
+        if (
+          currentProduct.stock <
+          requestedQuantity
+        ) {
+          const error = new Error(
+            `Insufficient stock for product: ${currentProduct.name}`
+          );
+
+          error.statusCode = 400;
+
+          throw error;
+        }
+      }
+
+      /*
+       * Create the order.
+       */
       const createdOrder =
         await tx.order.create({
           data: {
@@ -179,20 +309,73 @@ const createOrder = async (
           },
         });
 
-      for (const item of orderItems) {
-        await tx.product.update({
-          where: {
-            id: item.productId,
-          },
-          data: {
-            stock: {
-              decrement: item.quantity,
+      /*
+       * Decrease each product's stock exactly once.
+       */
+      for (const productId of productIds) {
+        const quantity =
+          quantityByProduct.get(productId);
+
+        const updated =
+          await tx.product.updateMany({
+            where: {
+              id: productId,
+              stock: {
+                gte: quantity,
+              },
             },
-          },
-        });
+            data: {
+              stock: {
+                decrement: quantity,
+              },
+            },
+          });
+
+        if (updated.count !== 1) {
+          const product =
+            await tx.product.findUnique({
+              where: {
+                id: productId,
+              },
+            });
+
+          const productName =
+            product?.name ||
+            `Product ${productId}`;
+
+          const error = new Error(
+            `Insufficient stock for product: ${productName}`
+          );
+
+          error.statusCode = 400;
+
+          throw error;
+        }
       }
 
-      return createdOrder;
+      /*
+       * Return the order again after stock updates,
+       * so the response contains the final product data.
+       */
+      return tx.order.findUnique({
+        where: {
+          id: createdOrder.id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
+          items: {
+            include: {
+              product: true,
+            },
+          },
+        },
+      });
     }
   );
 
@@ -205,6 +388,28 @@ const updateOrderStatus = async (
   database = prisma
 ) => {
   const orderId = Number(id);
+
+  if (!Number.isInteger(orderId)) {
+    const error = new Error("Invalid order ID");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const allowedStatuses = [
+    "PENDING",
+    "PROCESSING",
+    "SHIPPED",
+    "DELIVERED",
+    "CANCELLED",
+  ];
+
+  if (!allowedStatuses.includes(status)) {
+    const error = new Error(
+      "Invalid order status"
+    );
+    error.statusCode = 400;
+    throw error;
+  }
 
   const existingOrder =
     await database.order.findUnique({
@@ -248,6 +453,12 @@ const deleteOrder = async (
   database = prisma
 ) => {
   const orderId = Number(id);
+
+  if (!Number.isInteger(orderId)) {
+    const error = new Error("Invalid order ID");
+    error.statusCode = 400;
+    throw error;
+  }
 
   const existingOrder =
     await database.order.findUnique({

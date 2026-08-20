@@ -1,79 +1,135 @@
 import express from "express";
 
 import {
-  getOrders,
-  getOrder,
-  createOrder,
-  updateOrderStatus,
+  create,
+  getMine,
+  getOne,
+  getAll,
+  updateStatus,
+  cancel,
   deleteOrder,
 } from "../controllers/order.controller.js";
 
-import validate from "../middlewares/validate.middleware.js";
-
-import authenticate, {
-  requireRole,
-} from "../middlewares/auth.middleware.js";
+import authMiddleware from "../middlewares/auth.middleware.js";
+import roleMiddleware from "../middlewares/role.middleware.js";
+import validationMiddleware from "../middlewares/validation.middleware.js";
 
 import {
-  createOrderSchema,
+  orderIdParamsSchema,
   updateOrderStatusSchema,
+  orderQuerySchema,
 } from "../validators/order.validator.js";
 
 const router = express.Router();
 
 /*
 |--------------------------------------------------------------------------
-| Orders
-|--------------------------------------------------------------------------
-| Customers:
-| - Create an order
-| - View an order
-|
-| Admin:
-| - View all orders
-| - Update order status
-| - Delete orders
+| Create Order
 |--------------------------------------------------------------------------
 */
 
-// Get all orders - ADMIN ONLY
-router.get(
-  "/",
-  authenticate,
-  requireRole("ADMIN"),
-  getOrders
-);
-
-// Get one order - AUTHENTICATED USERS
-router.get(
-  "/:id",
-  authenticate,
-  getOrder
-);
-
-// Create order - AUTHENTICATED USERS
 router.post(
   "/",
-  authenticate,
-  validate(createOrderSchema),
-  createOrder
+  authMiddleware,
+  create
 );
 
-// Update order status - ADMIN ONLY
-router.put(
+/*
+|--------------------------------------------------------------------------
+| Get My Orders
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  "/my-orders",
+  authMiddleware,
+  getMine
+);
+
+/*
+|--------------------------------------------------------------------------
+| Admin - Get All Orders
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  "/",
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  validationMiddleware(
+    orderQuerySchema,
+    "query"
+  ),
+  getAll
+);
+
+/*
+|--------------------------------------------------------------------------
+| Admin - Update Order Status
+|--------------------------------------------------------------------------
+*/
+
+router.patch(
   "/:id/status",
-  authenticate,
-  requireRole("ADMIN"),
-  validate(updateOrderStatusSchema),
-  updateOrderStatus
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  validationMiddleware(
+    orderIdParamsSchema,
+    "params"
+  ),
+  validationMiddleware(
+    updateOrderStatusSchema
+  ),
+  updateStatus
 );
 
-// Delete order - ADMIN ONLY
+/*
+|--------------------------------------------------------------------------
+| Customer - Cancel Order
+|--------------------------------------------------------------------------
+*/
+
+router.patch(
+  "/:id/cancel",
+  authMiddleware,
+  validationMiddleware(
+    orderIdParamsSchema,
+    "params"
+  ),
+  cancel
+);
+
+/*
+|--------------------------------------------------------------------------
+| Admin - Delete Order
+|--------------------------------------------------------------------------
+*/
+
 router.delete(
   "/:id",
-  authenticate,
-  requireRole("ADMIN"),
+  authMiddleware,
+  roleMiddleware("ADMIN"),
+  validationMiddleware(
+    orderIdParamsSchema,
+    "params"
+  ),
   deleteOrder
+);
+
+/*
+|--------------------------------------------------------------------------
+| Get Order By ID
+|--------------------------------------------------------------------------
+*/
+
+router.get(
+  "/:id",
+  authMiddleware,
+  validationMiddleware(
+    orderIdParamsSchema,
+    "params"
+  ),
+  getOne
 );
 
 export default router;

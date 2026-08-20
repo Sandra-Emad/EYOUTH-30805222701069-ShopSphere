@@ -38,6 +38,8 @@ describe("Cart API Integration", () => {
     token = jwt.sign(
       {
         id: user.id,
+        userId: user.id,
+        email: user.email,
         role: user.role,
       },
       process.env.JWT_SECRET
@@ -83,8 +85,7 @@ describe("Cart API Integration", () => {
   });
 
   test("should reject unauthenticated cart access", async () => {
-    const response = await request(app)
-      .get("/api/cart");
+    const response = await request(app).get("/api/cart");
 
     expect(response.status).toBe(401);
 
@@ -157,13 +158,15 @@ describe("Cart API Integration", () => {
   });
 
   test("should clear the cart", async () => {
-    await request(app)
+    const addResponse = await request(app)
       .post("/api/cart/items")
       .set("Authorization", `Bearer ${token}`)
       .send({
         productId: product.id,
         quantity: 1,
       });
+
+    expect(addResponse.status).toBe(200);
 
     const response = await request(app)
       .delete("/api/cart")

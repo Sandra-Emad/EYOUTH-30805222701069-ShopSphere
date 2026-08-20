@@ -1,37 +1,75 @@
 import Joi from "joi";
 
-export const createOrderSchema = Joi.object({
-  userId: Joi.number()
-    .integer()
-    .positive()
-    .required(),
+/*
+|--------------------------------------------------------------------------
+| Order ID
+|--------------------------------------------------------------------------
+*/
 
-  items: Joi.array()
-    .items(
-      Joi.object({
-        productId: Joi.number()
-          .integer()
-          .positive()
-          .required(),
+export const orderIdParamsSchema =
+  Joi.object({
+    id: Joi.number()
+      .integer()
+      .positive()
+      .required(),
+  });
 
-        quantity: Joi.number()
-          .integer()
-          .positive()
-          .required(),
-      })
-    )
-    .min(1)
-    .required(),
-});
+/*
+|--------------------------------------------------------------------------
+| Update Order Status
+|--------------------------------------------------------------------------
+*/
 
-export const updateOrderStatusSchema = Joi.object({
-  status: Joi.string()
-    .valid(
-      "PENDING",
-      "PROCESSING",
-      "SHIPPED",
-      "DELIVERED",
-      "CANCELLED"
-    )
-    .required(),
-});
+export const updateOrderStatusSchema =
+  Joi.object({
+    status: Joi.string()
+      .valid(
+        "PENDING",
+        "PROCESSING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      )
+      .required(),
+  });
+
+/*
+|--------------------------------------------------------------------------
+| Order Query
+|--------------------------------------------------------------------------
+*/
+
+export const orderQuerySchema =
+  Joi.object({
+    page: Joi.number()
+      .integer()
+      .positive()
+      .default(1),
+
+    limit: Joi.number()
+      .integer()
+      .positive()
+      .max(100)
+      .default(20),
+
+    status: Joi.string()
+      .valid(
+        "PENDING",
+        "PROCESSING",
+        "SHIPPED",
+        "DELIVERED",
+        "CANCELLED"
+      )
+      .optional(),
+
+    userId: Joi.number()
+      .integer()
+      .positive()
+      .optional(),
+  });
+
+export default {
+  orderIdParamsSchema,
+  updateOrderStatusSchema,
+  orderQuerySchema,
+};

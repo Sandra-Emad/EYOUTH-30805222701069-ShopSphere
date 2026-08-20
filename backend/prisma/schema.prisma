@@ -53,9 +53,22 @@ model Product {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  category   Category    @relation(fields: [categoryId], references: [id])
+  category   Category       @relation(fields: [categoryId], references: [id])
   orderItems OrderItem[]
   cartItems  CartItem[]
+  images     ProductImage[]
+}
+
+model ProductImage {
+  id        Int      @id @default(autoincrement())
+  url       String
+  altText   String?
+  productId Int
+  createdAt DateTime @default(now())
+
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
 }
 
 model Order {

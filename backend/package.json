@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"  },
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -21,6 +22,7 @@
     "joi": "^18.2.3",
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.2",
+    "multer": "^2.2.0",
     "pg": "^8.23.0",
     "prisma": "^7.9.1"
   },
