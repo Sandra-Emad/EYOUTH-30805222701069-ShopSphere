@@ -27,6 +27,12 @@ Thumbs.db
 # Prisma generated client
 backend/src/generated/
 
+# Coverage
+backend/coverage/
+
 # Temporary files
 *.tmp
-*.tempbackend/coverage/
+*.temp
+
+# Test output
+test-output.txt
