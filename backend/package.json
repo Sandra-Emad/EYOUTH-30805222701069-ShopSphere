@@ -1,17 +1,31 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "Full-Stack E-Commerce Platform Backend",
+  "main": "src/server.js",
+  "type": "module",
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
-    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand"
+    "test": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand",
+    "test:coverage": "cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --coverage",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:seed": "prisma db seed"
   },
-  "keywords": [],
+  "prisma": {
+    "seed": "node prisma/seed.js"
+  },
+  "keywords": [
+    "ecommerce",
+    "express",
+    "prisma",
+    "postgresql",
+    "mongodb",
+    "nodejs"
+  ],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@prisma/adapter-pg": "^7.9.1",
     "@prisma/client": "^7.9.1",
@@ -23,6 +37,7 @@
     "jsonwebtoken": "^9.0.3",
     "mongoose": "^9.9.2",
     "multer": "^2.2.0",
+    "nodemailer": "^9.0.5",
     "pg": "^8.23.0",
     "prisma": "^7.9.1"
   },
