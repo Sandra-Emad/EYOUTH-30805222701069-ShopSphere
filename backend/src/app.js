@@ -8,6 +8,7 @@ import categoryRoutes from "./routes/category.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
+import activityLogRoutes from "./routes/activityLog.routes.js";
 
 import { useTestDatabase } from "./middlewares/test-database.middleware.js";
 
@@ -27,15 +28,9 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-/*
-|--------------------------------------------------------------------------
-| Test Database
-|--------------------------------------------------------------------------
-|
-| During Jest tests, all controllers/services must use
-| TEST_DATABASE_URL instead of DATABASE_URL.
-|
-*/
+/* =========================
+   Test Database
+========================= */
 
 if (process.env.NODE_ENV === "test") {
   app.use(useTestDatabase);
@@ -75,9 +70,10 @@ app.use("/api/categories", categoryRoutes);
 app.use("/api/cart", cartRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
+app.use("/api/activity-logs", activityLogRoutes);
 
 /* =========================
-   404 Handler
+   404
 ========================= */
 
 app.use((req, res) => {

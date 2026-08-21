@@ -1,0 +1,991 @@
+
+> backend@1.0.0 test
+> cross-env NODE_ENV=test node --experimental-vm-modules node_modules/jest/bin/jest.js --runInBand --runInBand
+
+(node:3188) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+FAIL tests/activityLog/activityLog.integration.test.js (6.657 s)
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+  ● Activity Log API Integration › Validation › should reject invalid page
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 403
+
+    [0m [90m 87 |[39m         })[33m;[39m
+     [90m 88 |[39m
+    [31m[1m>[22m[39m[90m 89 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m    |[39m                               [31m[1m^[22m[39m
+     [90m 90 |[39m       expect(response[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 91 |[39m     })[33m;[39m
+     [90m 92 |[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:89:31)
+
+  ● Activity Log API Integration › Validation › should reject invalid limit
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 403
+
+    [0m [90m  99 |[39m         })[33m;[39m
+     [90m 100 |[39m
+    [31m[1m>[22m[39m[90m 101 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 102 |[39m       expect(response[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 103 |[39m     })[33m;[39m
+     [90m 104 |[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:101:31)
+
+  ● Activity Log API Integration › Validation › should reject invalid userId
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 403
+
+    [0m [90m 111 |[39m         })[33m;[39m
+     [90m 112 |[39m
+    [31m[1m>[22m[39m[90m 113 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 114 |[39m       expect(response[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mfalse[39m)[33m;[39m
+     [90m 115 |[39m     })[33m;[39m
+     [90m 116 |[39m   })[33m;[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:113:31)
+
+  ● Activity Log API Integration › Activity Log Retrieval › GET /api/activity-logs should return activity logs
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 403
+
+    [0m [90m 122 |[39m         [33m.[39m[36mset[39m([32m"Authorization"[39m[33m,[39m [32m`Bearer ${adminToken}`[39m)[33m;[39m
+     [90m 123 |[39m
+    [31m[1m>[22m[39m[90m 124 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 125 |[39m
+     [90m 126 |[39m       expect(response[33m.[39mbody)[33m.[39mtoMatchObject({
+     [90m 127 |[39m         success[33m:[39m [36mtrue[39m[33m,[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:124:31)
+
+  ● Activity Log API Integration › Activity Log Retrieval › should support pagination
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 403
+
+    [0m [90m 147 |[39m         })[33m;[39m
+     [90m 148 |[39m
+    [31m[1m>[22m[39m[90m 149 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 150 |[39m
+     [90m 151 |[39m       expect(response[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 152 |[39m       expect(response[33m.[39mbody[33m.[39mpagination[33m.[39mpage)[33m.[39mtoBe([35m1[39m)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:149:31)
+
+  ● Activity Log API Integration › Activity Log Retrieval › should support action filtering
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 403
+
+    [0m [90m 162 |[39m         })[33m;[39m
+     [90m 163 |[39m
+    [31m[1m>[22m[39m[90m 164 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 165 |[39m
+     [90m 166 |[39m       expect(response[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 167 |[39m       expect([33mArray[39m[33m.[39misArray(response[33m.[39mbody[33m.[39mlogs))[33m.[39mtoBe([36mtrue[39m)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:164:31)
+
+  ● Activity Log API Integration › Activity Log Retrieval › should support entity filtering
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 403
+
+    [0m [90m 180 |[39m         })[33m;[39m
+     [90m 181 |[39m
+    [31m[1m>[22m[39m[90m 182 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m200[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 183 |[39m
+     [90m 184 |[39m       expect(response[33m.[39mbody[33m.[39msuccess)[33m.[39mtoBe([36mtrue[39m)[33m;[39m
+     [90m 185 |[39m       expect([33mArray[39m[33m.[39misArray(response[33m.[39mbody[33m.[39mlogs))[33m.[39mtoBe([36mtrue[39m)[33m;[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:182:31)
+
+  ● Activity Log API Integration › Activity Log Retrieval › GET /api/activity-logs/:id should return 404 for a valid but nonexistent ID
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 404
+    Received: 403
+
+    [0m [90m 197 |[39m         [33m.[39m[36mset[39m([32m"Authorization"[39m[33m,[39m [32m`Bearer ${adminToken}`[39m)[33m;[39m
+     [90m 198 |[39m
+    [31m[1m>[22m[39m[90m 199 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m404[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 200 |[39m
+     [90m 201 |[39m       expect(response[33m.[39mbody)[33m.[39mtoMatchObject({
+     [90m 202 |[39m         success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:199:31)
+
+  ● Activity Log API Integration › Activity Log Retrieval › GET /api/activity-logs/:id should reject an invalid ID
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 400
+    Received: 403
+
+    [0m [90m 210 |[39m         [33m.[39m[36mset[39m([32m"Authorization"[39m[33m,[39m [32m`Bearer ${adminToken}`[39m)[33m;[39m
+     [90m 211 |[39m
+    [31m[1m>[22m[39m[90m 212 |[39m       expect(response[33m.[39mstatus)[33m.[39mtoBe([35m400[39m)[33m;[39m
+     [90m     |[39m                               [31m[1m^[22m[39m
+     [90m 213 |[39m
+     [90m 214 |[39m       expect(response[33m.[39mbody)[33m.[39mtoMatchObject({
+     [90m 215 |[39m         success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at Object.<anonymous> (tests/activityLog/activityLog.integration.test.js:212:31)
+
+  ● Activity Log API Integration › Activity Log Service / Database › should be able to create and retrieve an activity log
+
+    thrown: "Exceeded timeout of 5000 ms for a test.
+    Add a timeout value to this test to increase the timeout, if this is a long-running test. See https://jestjs.io/docs/api#testname-fn-timeout."
+
+    [0m [90m 220 |[39m
+     [90m 221 |[39m   describe([32m"Activity Log Service / Database"[39m[33m,[39m () [33m=>[39m {
+    [31m[1m>[22m[39m[90m 222 |[39m     test([32m"should be able to create and retrieve an activity log"[39m[33m,[39m [36masync[39m () [33m=>[39m {
+     [90m     |[39m     [31m[1m^[22m[39m
+     [90m 223 |[39m       [36mconst[39m log [33m=[39m [36mawait[39m [33mActivityLog[39m[33m.[39mcreate({
+     [90m 224 |[39m         userId[33m:[39m [35m1[39m[33m,[39m
+     [90m 225 |[39m         action[33m:[39m [32m"TEST"[39m[33m,[39m[0m
+
+      at tests/activityLog/activityLog.integration.test.js:222:5
+      at tests/activityLog/activityLog.integration.test.js:221:3
+      at tests/activityLog/activityLog.integration.test.js:7:1
+
+PASS tests/api/activityLog.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.log
+      MongoDB connected successfully
+
+      at connectMongoDB (src/config/mongodb.js:11:13)
+
+    console.error
+      Unhandled error: Error: Invalid activity log id
+          at getActivityLogById (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\activityLog.service.js:89:19)
+          at getLogById (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\activityLog.controller.js:27:23)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:157:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\middlewares\role.middleware.js:17:5
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:157:13)
+          at authenticate (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\middlewares\auth.middleware.js:59:5)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:157:13)
+          at Route.dispatch (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:117:3)
+          at handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:435:11)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:295:15
+          at param (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:600:14)
+          at param (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:610:14)
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:664:3)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at router.handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:186:3)
+          at router (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:60:12)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at useTestDatabase (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\middlewares\test-database.middleware.js:5:3)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at read (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\read.js:53:5)
+          at urlencodedParser (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\types\urlencoded.js:51:5)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at read (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\read.js:53:5)
+          at jsonParser (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\types\json.js:60:5)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at cors (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:188:7)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:224:17
+          at originCallback (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:214:15)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:219:13
+          at optionsCallback (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:199:9)
+          at corsMiddleware (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:204:7)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at router.handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:186:3)
+          at app.handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\express\lib\application.js:177:15)
+          at Server.app (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\express\lib\express.js:38:9)
+          at Server.emit (node:events:508:28)
+          at parserOnIncoming (node:_http_server:1210:12)
+          at HTTPParser.parserOnHeadersComplete (node:_http_common:123:17) {
+        statusCode: 400
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+    console.error
+      Unhandled error: Error: Activity log not found
+          at getActivityLogById (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\activityLog.service.js:97:19)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at getLogById (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\activityLog.controller.js:27:17) {
+        statusCode: 404
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+PASS tests/products/product.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      Unhandled error: Error: Product already exists
+          at createError (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\product.service.js:28:17)
+          at createProduct (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\product.service.js:296:11)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\product.controller.js:18:19 {
+        statusCode: 409
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+    console.error
+      Unhandled error: Error: Category not found
+          at createError (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\product.service.js:28:17)
+          at createProduct (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\product.service.js:314:11)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\product.controller.js:18:19 {
+        statusCode: 404
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+    console.error
+      Unhandled error: Error: Product not found
+          at createError (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\product.service.js:28:17)
+          at getProductById (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\product.service.js:227:11)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\product.controller.js:43:19 {
+        statusCode: 404
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+PASS tests/categories/category.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      Create category error: Category already exists
+
+    [0m [90m 50 |[39m     })[33m;[39m
+     [90m 51 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 52 |[39m     console[33m.[39merror([32m"Create category error:"[39m[33m,[39m error[33m.[39mmessage)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 53 |[39m
+     [90m 54 |[39m     res[33m.[39mstatus(error[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 55 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Failed to create category"[39m[33m,[39m[0m
+
+      at createCategory (src/controllers/category.controller.js:52:13)
+
+    console.error
+      Get category error: Category not found
+
+    [0m [90m 30 |[39m     })[33m;[39m
+     [90m 31 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 32 |[39m     console[33m.[39merror([32m"Get category error:"[39m[33m,[39m error[33m.[39mmessage)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 33 |[39m
+     [90m 34 |[39m     res[33m.[39mstatus(error[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 35 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Failed to get category"[39m[33m,[39m[0m
+
+      at getCategory (src/controllers/category.controller.js:32:13)
+
+PASS tests/auth/auth.integration.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      Registration error: Email is already registered
+
+    [0m [90m 19 |[39m     })[33m;[39m
+     [90m 20 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 21 |[39m     console[33m.[39merror([32m"Registration error:"[39m[33m,[39m error[33m.[39mmessage)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 22 |[39m
+     [90m 23 |[39m     res[33m.[39mstatus(error[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 24 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Registration failed"[39m[33m,[39m[0m
+
+      at register (src/controllers/auth.controller.js:21:13)
+
+    console.error
+      Login error: Invalid email or password
+
+    [0m [90m 44 |[39m     })[33m;[39m
+     [90m 45 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 46 |[39m     console[33m.[39merror([32m"Login error:"[39m[33m,[39m error[33m.[39mmessage)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 47 |[39m
+     [90m 48 |[39m     res[33m.[39mstatus(error[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 49 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Login failed"[39m[33m,[39m[0m
+
+      at login (src/controllers/auth.controller.js:46:13)
+
+    console.error
+      Login error: Invalid email or password
+
+    [0m [90m 44 |[39m     })[33m;[39m
+     [90m 45 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 46 |[39m     console[33m.[39merror([32m"Login error:"[39m[33m,[39m error[33m.[39mmessage)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 47 |[39m
+     [90m 48 |[39m     res[33m.[39mstatus(error[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 49 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Login failed"[39m[33m,[39m[0m
+
+      at login (src/controllers/auth.controller.js:46:13)
+
+    console.error
+      Authentication error: jwt malformed
+
+    [0m [90m 59 |[39m     next()[33m;[39m
+     [90m 60 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 61 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 62 |[39m       [32m"Authentication error:"[39m[33m,[39m
+     [90m 63 |[39m       error[33m.[39mmessage
+     [90m 64 |[39m     )[33m;[39m[0m
+
+      at authenticate (src/middlewares/auth.middleware.js:61:13)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at Route.dispatch (node_modules/router/lib/route.js:117:3)
+      at handle (node_modules/router/index.js:435:11)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at node_modules/router/index.js:295:15
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at router (node_modules/router/index.js:60:12)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at useTestDatabase (src/middlewares/test-database.middleware.js:5:3)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at urlencodedParser (node_modules/body-parser/lib/types/urlencoded.js:51:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at read (node_modules/body-parser/lib/read.js:53:5)
+      at jsonParser (node_modules/body-parser/lib/types/json.js:60:5)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at cors (node_modules/cors/lib/index.js:188:7)
+      at node_modules/cors/lib/index.js:224:17
+      at originCallback (node_modules/cors/lib/index.js:214:15)
+      at node_modules/cors/lib/index.js:219:13
+      at optionsCallback (node_modules/cors/lib/index.js:199:9)
+      at corsMiddleware (node_modules/cors/lib/index.js:204:7)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at trimPrefix (node_modules/router/index.js:342:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at router.handle (node_modules/router/index.js:186:3)
+      at app.handle (node_modules/express/lib/application.js:177:15)
+      at Server.app (node_modules/express/lib/express.js:38:9)
+
+PASS tests/orders/order.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ◈ encrypted .env [www.dotenvx.com]
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      Create order error: User not found
+
+    [0m [90m 34 |[39m     })[33m;[39m
+     [90m 35 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 36 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 37 |[39m       [32m"Create order error:"[39m[33m,[39m
+     [90m 38 |[39m       error[33m.[39mmessage
+     [90m 39 |[39m     )[33m;[39m[0m
+
+      at create (src/controllers/order.controller.js:36:13)
+
+    console.error
+      Create order error: Product with id 999999 not found
+
+    [0m [90m 34 |[39m     })[33m;[39m
+     [90m 35 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 36 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 37 |[39m       [32m"Create order error:"[39m[33m,[39m
+     [90m 38 |[39m       error[33m.[39mmessage
+     [90m 39 |[39m     )[33m;[39m[0m
+
+      at create (src/controllers/order.controller.js:36:13)
+
+    console.error
+      Create order error: Insufficient stock for product: Order Test Product 1787273521462_dchuau7o
+
+    [0m [90m 34 |[39m     })[33m;[39m
+     [90m 35 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 36 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 37 |[39m       [32m"Create order error:"[39m[33m,[39m
+     [90m 38 |[39m       error[33m.[39mmessage
+     [90m 39 |[39m     )[33m;[39m[0m
+
+      at create (src/controllers/order.controller.js:36:13)
+
+    console.error
+      Get order error: Order not found
+
+    [0m [90m 151 |[39m     })[33m;[39m
+     [90m 152 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 153 |[39m     console[33m.[39merror(
+     [90m     |[39m             [31m[1m^[22m[39m
+     [90m 154 |[39m       [32m"Get order error:"[39m[33m,[39m
+     [90m 155 |[39m       error[33m.[39mmessage
+     [90m 156 |[39m     )[33m;[39m[0m
+
+      at getOne (src/controllers/order.controller.js:153:13)
+
+PASS tests/reviews/review.integration.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      Create review error: You have already reviewed this product
+
+    [0m [90m 39 |[39m     })[33m;[39m
+     [90m 40 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 41 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 42 |[39m       [32m"Create review error:"[39m[33m,[39m
+     [90m 43 |[39m       error[33m.[39mmessage
+     [90m 44 |[39m     )[33m;[39m[0m
+
+      at create (src/controllers/review.controller.js:41:13)
+
+    console.error
+      Get reviews error: Invalid product ID
+
+    [0m [90m 10 |[39m     [36mreturn[39m res[33m.[39mstatus([35m200[39m)[33m.[39mjson(result)[33m;[39m
+     [90m 11 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 12 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 13 |[39m       [32m"Get reviews error:"[39m[33m,[39m
+     [90m 14 |[39m       error[33m.[39mmessage
+     [90m 15 |[39m     )[33m;[39m[0m
+
+      at getByProduct (src/controllers/review.controller.js:12:13)
+
+    console.error
+      Get reviews error: Product not found
+
+    [0m [90m 10 |[39m     [36mreturn[39m res[33m.[39mstatus([35m200[39m)[33m.[39mjson(result)[33m;[39m
+     [90m 11 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 12 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 13 |[39m       [32m"Get reviews error:"[39m[33m,[39m
+     [90m 14 |[39m       error[33m.[39mmessage
+     [90m 15 |[39m     )[33m;[39m[0m
+
+      at getByProduct (src/controllers/review.controller.js:12:13)
+
+    console.error
+      Create review error: Rating must be an integer between 1 and 5
+
+    [0m [90m 39 |[39m     })[33m;[39m
+     [90m 40 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 41 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 42 |[39m       [32m"Create review error:"[39m[33m,[39m
+     [90m 43 |[39m       error[33m.[39mmessage
+     [90m 44 |[39m     )[33m;[39m[0m
+
+      at create (src/controllers/review.controller.js:41:13)
+
+    console.error
+      Create review error: Comment is required
+
+    [0m [90m 39 |[39m     })[33m;[39m
+     [90m 40 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 41 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 42 |[39m       [32m"Create review error:"[39m[33m,[39m
+     [90m 43 |[39m       error[33m.[39mmessage
+     [90m 44 |[39m     )[33m;[39m[0m
+
+      at create (src/controllers/review.controller.js:41:13)
+
+    console.error
+      Delete review error: You are not allowed to delete this review
+
+    [0m [90m 83 |[39m     [36mreturn[39m res[33m.[39mstatus([35m200[39m)[33m.[39mjson(result)[33m;[39m
+     [90m 84 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 85 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 86 |[39m       [32m"Delete review error:"[39m[33m,[39m
+     [90m 87 |[39m       error[33m.[39mmessage
+     [90m 88 |[39m     )[33m;[39m[0m
+
+      at remove (src/controllers/review.controller.js:85:13)
+
+PASS tests/cart/cart.integration.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ override existing { override: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/api/api.audit.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/productImages/productImage.integration.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ suppress logs { quiet: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      Unhandled error: AppError: Invalid product ID
+          at parsePositiveInteger (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\productImage.service.js:11:11)
+          at getProductImages (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\productImage.service.js:98:5)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\productImage.controller.js:57:13
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\utils\asyncHandler.js:4:7
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:157:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\middlewares\validation.middleware.js:37:7
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:157:13)
+          at Route.dispatch (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\route.js:117:3)
+          at handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:435:11)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:295:15
+          at param (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:600:14)
+          at param (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:610:14)
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:664:3)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at router.handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:186:3)
+          at router (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:60:12)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at useTestDatabase (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\middlewares\test-database.middleware.js:5:3)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at read (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\read.js:53:5)
+          at urlencodedParser (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\types\urlencoded.js:51:5)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at read (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\read.js:53:5)
+          at jsonParser (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\body-parser\lib\types\json.js:60:5)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at cors (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:188:7)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:224:17
+          at originCallback (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:214:15)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:219:13
+          at optionsCallback (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:199:9)
+          at corsMiddleware (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\cors\lib\index.js:204:7)
+          at Layer.handleRequest (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\lib\layer.js:152:17)
+          at trimPrefix (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:342:13)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:297:9
+          at processParams (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:582:12)
+          at next (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:291:5)
+          at router.handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\router\index.js:186:3)
+          at app.handle (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\express\lib\application.js:177:15)
+          at Server.app (D:\deci 5\Full-Stack E-Commerce Platform\backend\node_modules\express\lib\express.js:38:9)
+          at Server.emit (node:events:508:28)
+          at parserOnIncoming (node:_http_server:1210:12)
+          at HTTPParser.parserOnHeadersComplete (node:_http_common:123:17) {
+        statusCode: 400,
+        isOperational: true
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+    console.error
+      Unhandled error: AppError: Product not found
+          at ensureProductExists (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\productImage.service.js:32:11)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at getProductImages (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\productImage.service.js:103:3)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\productImage.controller.js:57:7 {
+        statusCode: 404,
+        isOperational: true
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at node_modules/router/index.js:688:15
+      at next (node_modules/router/index.js:276:14)
+      at next (node_modules/router/lib/route.js:132:14)
+
+    console.error
+      Unhandled error: AppError: Product image not found
+          at deleteProductImage (D:\deci 5\Full-Stack E-Commerce Platform\backend\src\services\productImage.service.js:180:11)
+          at processTicksAndRejections (node:internal/process/task_queues:103:5)
+          at D:\deci 5\Full-Stack E-Commerce Platform\backend\src\controllers\productImage.controller.js:79:7 {
+        statusCode: 404,
+        isOperational: true
+      }
+
+    [0m [90m  96 |[39m
+     [90m  97 |[39m app[33m.[39muse((err[33m,[39m req[33m,[39m res[33m,[39m next) [33m=>[39m {
+    [31m[1m>[22m[39m[90m  98 |[39m   console[33m.[39merror([32m"Unhandled error:"[39m[33m,[39m err)[33m;[39m
+     [90m     |[39m           [31m[1m^[22m[39m
+     [90m  99 |[39m
+     [90m 100 |[39m   [36mreturn[39m res[33m.[39mstatus(err[33m.[39mstatusCode [33m||[39m [35m500[39m)[33m.[39mjson({
+     [90m 101 |[39m     success[33m:[39m [36mfalse[39m[33m,[39m[0m
+
+      at src/app.js:98:11
+      at Layer.handleError (node_modules/router/lib/layer.js:116:17)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at next (node_modules/router/index.js:291:5)
+      at Layer.handleError (node_modules/router/lib/layer.js:111:12)
+      at trimPrefix (node_modules/router/index.js:340:13)
+      at node_modules/router/index.js:297:9
+      at processParams (node_modules/router/index.js:582:12)
+      at Immediate.next (node_modules/router/index.js:291:5)
+      at Immediate._onImmediate (node_modules/router/index.js:688:15)
+
+PASS tests/auth/auth.service.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/reviews/review.service.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/cart/cart.service.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/products/product.service.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ multiple files { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/auth/auth.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ custom filepath { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/categories/category.service.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌘ enable debugging { debug: true }
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+PASS tests/auth/auth.middleware.test.js
+  ● Console
+
+    console.log
+      ◇ injected env (5) from .env // tip: ⌁ auth for agents [www.vestauth.com]
+
+      at _log (node_modules/dotenv/lib/main.js:131:11)
+
+    console.error
+      JWT_SECRET is not configured
+
+    [0m [90m 33 |[39m     [90m// JWT secret must exist[39m
+     [90m 34 |[39m     [36mif[39m ([33m![39mprocess[33m.[39menv[33m.[39m[33mJWT_SECRET[39m) {
+    [31m[1m>[22m[39m[90m 35 |[39m       console[33m.[39merror([32m"JWT_SECRET is not configured"[39m)[33m;[39m
+     [90m    |[39m               [31m[1m^[22m[39m
+     [90m 36 |[39m
+     [90m 37 |[39m       [36mreturn[39m res[33m.[39mstatus([35m500[39m)[33m.[39mjson({
+     [90m 38 |[39m         message[33m:[39m [32m"Authentication configuration error"[39m[33m,[39m[0m
+
+      at authenticate (src/middlewares/auth.middleware.js:35:15)
+      at Object.<anonymous> (tests/auth/auth.middleware.test.js:84:5)
+
+    console.error
+      Authentication error: jwt malformed
+
+    [0m [90m 59 |[39m     next()[33m;[39m
+     [90m 60 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 61 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 62 |[39m       [32m"Authentication error:"[39m[33m,[39m
+     [90m 63 |[39m       error[33m.[39mmessage
+     [90m 64 |[39m     )[33m;[39m[0m
+
+      at authenticate (src/middlewares/auth.middleware.js:61:13)
+      at Object.<anonymous> (tests/auth/auth.middleware.test.js:109:5)
+
+    console.error
+      Authentication error: jwt expired
+
+    [0m [90m 59 |[39m     next()[33m;[39m
+     [90m 60 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 61 |[39m     console[33m.[39merror(
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 62 |[39m       [32m"Authentication error:"[39m[33m,[39m
+     [90m 63 |[39m       error[33m.[39mmessage
+     [90m 64 |[39m     )[33m;[39m[0m
+
+      at authenticate (src/middlewares/auth.middleware.js:61:13)
+      at Object.<anonymous> (tests/auth/auth.middleware.test.js:146:5)
+
+
+Test Suites: 1 failed, 16 passed, 17 total
+Tests:       10 failed, 234 passed, 244 total
+Snapshots:   0 total
+Time:        18.89 s, estimated 20 s
+Ran all test suites.
+Jest did not exit one second after the test run has completed.
+
+'This usually means that there are asynchronous operations that weren't stopped in your tests. Consider running Jest with `--detectOpenHandles` to troubleshoot this issue.

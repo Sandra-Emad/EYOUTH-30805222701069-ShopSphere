@@ -12,6 +12,8 @@ import {
   deleteProductImage,
 } from "../services/productImage.service.js";
 
+import { createActivityLog } from "../services/activityLog.service.js";
+
 const create = asyncHandler(async (req, res) => {
   const product = await createProduct(
     req.body,
