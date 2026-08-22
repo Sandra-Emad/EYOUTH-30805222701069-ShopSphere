@@ -1,17 +1,15 @@
 import prisma from "../config/prisma.js";
 
-/*
-|--------------------------------------------------------------------------
-| Helpers
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Helpers                                                                    */
+/* -------------------------------------------------------------------------- */
 
 const normalizeProduct = (product) => {
   if (!product) {
     return product;
   }
 
-  return {
+  const normalizedProduct = {
     ...product,
     price:
       product.price !== undefined &&
@@ -19,6 +17,28 @@ const normalizeProduct = (product) => {
         ? product.price.toString()
         : product.price,
   };
+
+  /*
+   * Only add images when the returned database object
+   * actually contains an images property.
+   *
+   * This keeps the service compatible with both:
+   * - Product queries that include images
+   * - Tests/mocks that only provide category
+   */
+  if (Array.isArray(product.images)) {
+    normalizedProduct.images = product.images;
+
+    if (
+      !product.imageUrl &&
+      product.images.length > 0
+    ) {
+      normalizedProduct.imageUrl =
+        product.images[0].url;
+    }
+  }
+
+  return normalizedProduct;
 };
 
 const createError = (
@@ -30,11 +50,17 @@ const createError = (
   return error;
 };
 
-/*
-|--------------------------------------------------------------------------
-| Get All Products
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Product Include                                                            */
+/* -------------------------------------------------------------------------- */
+
+const productInclude = {
+  category: true,
+};
+
+/* -------------------------------------------------------------------------- */
+/* Get All Products                                                           */
+/* -------------------------------------------------------------------------- */
 
 export const getAllProducts = async (
   database = prisma,
@@ -77,15 +103,14 @@ export const getAllProducts = async (
 
   const where = {};
 
-  /*
-   * Search
-   */
+  /* Search */
 
   if (
     typeof search === "string" &&
     search.trim()
   ) {
-    const searchValue = search.trim();
+    const searchValue =
+      search.trim();
 
     where.OR = [
       {
@@ -103,9 +128,7 @@ export const getAllProducts = async (
     ];
   }
 
-  /*
-   * Category filter
-   */
+  /* Category filter */
 
   if (
     categoryId !== undefined &&
@@ -115,7 +138,9 @@ export const getAllProducts = async (
       Number(categoryId);
 
     if (
-      !Number.isInteger(parsedCategoryId) ||
+      !Number.isInteger(
+        parsedCategoryId
+      ) ||
       parsedCategoryId <= 0
     ) {
       throw createError(
@@ -124,22 +149,20 @@ export const getAllProducts = async (
       );
     }
 
-    where.categoryId = parsedCategoryId;
+    where.categoryId =
+      parsedCategoryId;
   }
 
-  /*
-   * Query
-   */
+  /* Query */
 
   const [products, total] =
     await Promise.all([
       database.product.findMany({
         where,
-        include: {
-          category: true,
-        },
+        include: productInclude,
         orderBy: {
-          [orderField]: orderDirection,
+          [orderField]:
+            orderDirection,
         },
         skip,
         take: safeLimit,
@@ -159,42 +182,33 @@ export const getAllProducts = async (
 
   return {
     products:
-      products.map(normalizeProduct),
+      products.map(
+        normalizeProduct
+      ),
 
     pagination: {
       page: safePage,
       limit: safeLimit,
       total,
       totalPages,
-
       hasNextPage:
         safePage < totalPages,
-
       hasPreviousPage:
         safePage > 1,
     },
   };
 };
 
-/*
-|--------------------------------------------------------------------------
-| Compatibility Alias
-|--------------------------------------------------------------------------
-|
-| Older tests/controllers use getProducts.
-| Keep both names available.
-|
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Compatibility Alias                                                        */
+/* -------------------------------------------------------------------------- */
 
 export const getProducts =
   getAllProducts;
 
-/*
-|--------------------------------------------------------------------------
-| Get Product By ID
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Get Product By ID                                                          */
+/* -------------------------------------------------------------------------- */
 
 export const getProductById = async (
   id,
@@ -217,10 +231,7 @@ export const getProductById = async (
       where: {
         id: productId,
       },
-
-      include: {
-        category: true,
-      },
+      include: productInclude,
     });
 
   if (!product) {
@@ -233,11 +244,9 @@ export const getProductById = async (
   return normalizeProduct(product);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Create Product
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Create Product                                                             */
+/* -------------------------------------------------------------------------- */
 
 export const createProduct = async (
   {
@@ -278,9 +287,7 @@ export const createProduct = async (
     );
   }
 
-  /*
-   * Check duplicate product
-   */
+  /* Check duplicate product */
 
   const existingProduct =
     await database.product.findFirst({
@@ -299,9 +306,7 @@ export const createProduct = async (
     );
   }
 
-  /*
-   * Check category
-   */
+  /* Check category */
 
   const category =
     await database.category.findUnique({
@@ -317,9 +322,7 @@ export const createProduct = async (
     );
   }
 
-  /*
-   * Create
-   */
+  /* Create */
 
   const product =
     await database.product.create({
@@ -329,7 +332,8 @@ export const createProduct = async (
         description:
           typeof description ===
           "string"
-            ? description.trim() || null
+            ? description.trim() ||
+              null
             : null,
 
         price,
@@ -344,19 +348,15 @@ export const createProduct = async (
           parsedCategoryId,
       },
 
-      include: {
-        category: true,
-      },
+      include: productInclude,
     });
 
   return normalizeProduct(product);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Update Product
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Update Product                                                             */
+/* -------------------------------------------------------------------------- */
 
 export const updateProduct = async (
   id,
@@ -375,6 +375,8 @@ export const updateProduct = async (
     );
   }
 
+  /* Find existing product */
+
   const existingProduct =
     await database.product.findUnique({
       where: {
@@ -389,47 +391,56 @@ export const updateProduct = async (
     );
   }
 
-  /*
-   * Duplicate name check
-   */
+  /* Duplicate name check */
 
   if (
     data.name !== undefined &&
-    typeof data.name === "string" &&
-    data.name.trim().toLowerCase() !==
-      existingProduct.name
-        .toLowerCase()
+    typeof data.name === "string"
   ) {
-    const duplicate =
-      await database.product.findFirst({
-        where: {
-          name: {
-            equals: data.name.trim(),
-            mode: "insensitive",
-          },
+    const normalizedNewName =
+      data.name.trim();
 
-          NOT: {
-            id: productId,
-          },
-        },
-      });
+    const currentName =
+      typeof existingProduct.name ===
+      "string"
+        ? existingProduct.name.trim()
+        : "";
 
-    if (duplicate) {
-      throw createError(
-        "Product already exists",
-        409
-      );
+    if (
+      normalizedNewName.toLowerCase() !==
+      currentName.toLowerCase()
+    ) {
+      const duplicate =
+        await database.product.findFirst({
+          where: {
+            name: {
+              equals:
+                normalizedNewName,
+              mode: "insensitive",
+            },
+            NOT: {
+              id: productId,
+            },
+          },
+        });
+
+      if (duplicate) {
+        throw createError(
+          "Product already exists",
+          409
+        );
+      }
     }
   }
 
-  /*
-   * Category check
-   */
+  /* Category check */
+
+  let parsedCategoryId;
 
   if (
     data.categoryId !== undefined
   ) {
-    const parsedCategoryId =
+    parsedCategoryId =
       Number(data.categoryId);
 
     if (
@@ -459,9 +470,7 @@ export const updateProduct = async (
     }
   }
 
-  /*
-   * Build update data
-   */
+  /* Build update data */
 
   const updateData = {};
 
@@ -504,12 +513,10 @@ export const updateProduct = async (
     data.categoryId !== undefined
   ) {
     updateData.categoryId =
-      Number(data.categoryId);
+      parsedCategoryId;
   }
 
-  /*
-   * Update
-   */
+  /* Update */
 
   const product =
     await database.product.update({
@@ -519,19 +526,15 @@ export const updateProduct = async (
 
       data: updateData,
 
-      include: {
-        category: true,
-      },
+      include: productInclude,
     });
 
   return normalizeProduct(product);
 };
 
-/*
-|--------------------------------------------------------------------------
-| Delete Product
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Delete Product                                                             */
+/* -------------------------------------------------------------------------- */
 
 export const deleteProduct = async (
   id,
@@ -575,16 +578,9 @@ export const deleteProduct = async (
   };
 };
 
-/*
-|--------------------------------------------------------------------------
-| Default Export
-|--------------------------------------------------------------------------
-|
-| Keep default export for controllers/services
-| that already use productService.xxx
-|
-|--------------------------------------------------------------------------
-*/
+/* -------------------------------------------------------------------------- */
+/* Default Export                                                             */
+/* -------------------------------------------------------------------------- */
 
 export default {
   getAllProducts,
