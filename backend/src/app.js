@@ -1,5 +1,6 @@
 import express from "express";
 import cors from "cors";
+import path from "path";
 
 import authRoutes from "./routes/auth.routes.js";
 import productRoutes from "./routes/product.routes.js";
@@ -12,6 +13,7 @@ import activityLogRoutes from "./routes/activityLog.routes.js";
 import statisticsRoutes from "./routes/statistics.routes.js";
 
 import { useTestDatabase } from "./middlewares/test-database.middleware.js";
+import activityLogger from "./middlewares/activityLogger.middleware.js";
 
 const app = express();
 
@@ -28,6 +30,15 @@ app.use(
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+/* Serve uploaded product images. */
+app.use(
+  "/uploads",
+  express.static(path.join(process.cwd(), "uploads"))
+);
+
+/* Automatically record authenticated write operations in MongoDB. */
+app.use(activityLogger);
 
 /* =========================
    Test Database

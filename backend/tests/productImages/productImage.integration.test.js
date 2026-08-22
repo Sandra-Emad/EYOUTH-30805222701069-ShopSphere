@@ -206,6 +206,56 @@ describe("Product Image API Integration", () => {
     );
   });
 
+  test("should upload a real image file, persist it, and serve it", async () => {
+    const jpeg1x1 = Buffer.from(
+      "/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAP//////////////////////////////////////////////////////////////////////////////////////2wBDAf//////////////////////////////////////////////////////////////////////////////////////wAARCAABAAEDASIAAhEBAxEB/8QAFQABAQAAAAAAAAAAAAAAAAAAAAf/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oADAMBAAIQAxAAAAF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABBQJ//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAwEBPwF//8QAFBEBAAAAAAAAAAAAAAAAAAAAAP/aAAgBAgEBPwF//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQAGPwJ//8QAFBABAAAAAAAAAAAAAAAAAAAAAP/aAAgBAQABPyF//9k=",
+      "base64"
+    );
+
+    const response = await request(app)
+      .post(`/api/product-images/${product.id}`)
+      .set(
+        "Authorization",
+        `Bearer ${adminToken}`
+      )
+      .field("altText", "Uploaded test image")
+      .attach("image", jpeg1x1, {
+        filename: "integration-test.jpg",
+        contentType: "image/jpeg",
+      });
+
+    expect(response.status).toBe(201);
+    expect(response.body.success).toBe(true);
+    expect(response.body.image.productId).toBe(product.id);
+    expect(response.body.image.url).toMatch(
+      /^\/uploads\/products\/.+\.jpg$/
+    );
+
+    const image = await prisma.productImage.findUnique({
+      where: { id: response.body.image.id },
+    });
+
+    expect(image).not.toBeNull();
+
+    const served = await request(app).get(image.url);
+    expect(served.status).toBe(200);
+    expect(served.headers["content-type"]).toMatch(/image\/jpeg/);
+
+    const deleteResponse = await request(app)
+      .delete(`/api/product-images/${image.id}`)
+      .set(
+        "Authorization",
+        `Bearer ${adminToken}`
+      );
+
+    expect(deleteResponse.status).toBe(200);
+    expect(
+      await prisma.productImage.findUnique({
+        where: { id: image.id },
+      })
+    ).toBeNull();
+  });
+
   test("should create an image record and return it", async () => {
     const image =
       await prisma.productImage.create({

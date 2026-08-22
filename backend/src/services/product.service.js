@@ -1,4 +1,6 @@
 import prisma from "../config/prisma.js";
+import fs from "fs/promises";
+import path from "path";
 
 /* -------------------------------------------------------------------------- */
 /* Helpers                                                                    */
@@ -56,6 +58,11 @@ const createError = (
 
 const productInclude = {
   category: true,
+  images: {
+    orderBy: {
+      createdAt: "desc",
+    },
+  },
 };
 
 /* -------------------------------------------------------------------------- */
@@ -566,15 +573,47 @@ export const deleteProduct = async (
     );
   }
 
+  const images = await database.productImage.findMany({
+    where: {
+      productId,
+    },
+    select: {
+      url: true,
+    },
+  });
+
   await database.product.delete({
     where: {
       id: productId,
     },
   });
 
+  await Promise.all(
+    images.map(async ({ url }) => {
+      if (!url || !url.startsWith("/uploads/")) {
+        return;
+      }
+
+      const relativePath = url
+        .replace(/^\/+/, "")
+        .replace(/\//g, path.sep);
+      const filePath = path.join(process.cwd(), relativePath);
+
+      try {
+        await fs.unlink(filePath);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          console.error(
+            "Failed to delete product image file:",
+            error.message
+          );
+        }
+      }
+    })
+  );
+
   return {
-    message:
-      "Product deleted successfully",
+    message: "Product deleted successfully",
   };
 };
 

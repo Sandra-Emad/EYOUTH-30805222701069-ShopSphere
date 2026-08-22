@@ -22,6 +22,9 @@ describe("Product Service", () => {
         update: jest.fn(),
         delete: jest.fn(),
       },
+      productImage: {
+        findMany: jest.fn(),
+      },
       category: {
         findUnique: jest.fn(),
       },
@@ -57,6 +60,11 @@ describe("Product Service", () => {
         where: {},
         include: {
           category: true,
+          images: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
         },
         orderBy: {
           createdAt: "desc",
@@ -308,6 +316,11 @@ describe("Product Service", () => {
         },
         include: {
           category: true,
+          images: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
         },
       });
 
@@ -411,6 +424,11 @@ describe("Product Service", () => {
         },
         include: {
           category: true,
+          images: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
         },
       });
 
@@ -566,6 +584,11 @@ describe("Product Service", () => {
         },
         include: {
           category: true,
+          images: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
         },
       });
 
@@ -721,6 +744,11 @@ describe("Product Service", () => {
         },
         include: {
           category: true,
+          images: {
+            orderBy: {
+              createdAt: "desc",
+            },
+          },
         },
       });
     });
@@ -736,6 +764,8 @@ describe("Product Service", () => {
       database.product.delete.mockResolvedValue({
         id: 1,
       });
+
+      database.productImage.findMany.mockResolvedValue([]);
 
       const result =
         await productService.deleteProduct(

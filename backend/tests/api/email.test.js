@@ -1,56 +1,50 @@
+process.env.NODE_ENV = "test";
+
 import request from "supertest";
 
 import app from "../../src/app.js";
 import testPrisma from "../../src/config/test-prisma.js";
 
 describe("Email API Integration", () => {
-  let userId;
-
-  const email =
-    `email-test-${Date.now()}@example.com`;
-
   const password = "Password123!";
 
-  beforeAll(async () => {
-    /*
-     * ============================================================
-     * Make sure SMTP is not required for registration tests
-     * ============================================================
-     */
+  let createdUserIds = [];
 
+  beforeAll(async () => {
     delete process.env.SMTP_HOST;
     delete process.env.SMTP_PORT;
     delete process.env.SMTP_USER;
     delete process.env.SMTP_PASS;
     delete process.env.EMAIL_FROM;
-  });
+
+    await testPrisma.$connect();
+  }, 30000);
 
   afterAll(async () => {
-    /*
-     * ============================================================
-     * Cleanup test user
-     * ============================================================
-     */
-
     try {
-      if (userId) {
-        await testPrisma.user.delete({
+      if (createdUserIds.length > 0) {
+        await testPrisma.user.deleteMany({
           where: {
-            id: userId,
+            id: {
+              in: createdUserIds,
+            },
           },
         });
       }
     } catch (error) {
-      // Ignore cleanup errors
+      // Ignore cleanup errors.
+    } finally {
+      await testPrisma.$disconnect();
     }
-
-    await testPrisma.$disconnect();
-  });
+  }, 30000);
 
   describe("Welcome Email", () => {
     test(
       "registration should succeed when SMTP configuration is missing",
       async () => {
+        const email =
+          `email-test-${Date.now()}@example.com`;
+
         const response = await request(app)
           .post("/api/auth/register")
           .send({
@@ -59,74 +53,56 @@ describe("Email API Integration", () => {
             password,
           });
 
-        expect(
-          [200, 201]
-        ).toContain(response.status);
+        expect([200, 201]).toContain(
+          response.status
+        );
 
-        expect(
-          response.body.user
-        ).toBeDefined();
+        expect(response.body.user).toBeDefined();
 
-        expect(
+        expect(response.body.user.id).toBeDefined();
+
+        expect(response.body.user.email).toBe(
+          email
+        );
+
+        createdUserIds.push(
           response.body.user.id
-        ).toBeDefined();
-
-        expect(
-          response.body.user.email
-        ).toBe(email);
-
-        userId =
-          response.body.user.id;
-      }
+        );
+      },
+      30000
     );
 
     test(
       "registration should not fail because welcome email fails",
       async () => {
-        const failingEmail =
+        const email =
           `email-failure-${Date.now()}@example.com`;
 
         const response = await request(app)
           .post("/api/auth/register")
           .send({
             name: "Email Failure Test",
-            email: failingEmail,
+            email,
             password,
           });
 
-        expect(
-          [200, 201]
-        ).toContain(response.status);
+        expect([200, 201]).toContain(
+          response.status
+        );
 
-        expect(
-          response.body.user
-        ).toBeDefined();
+        expect(response.body.user).toBeDefined();
 
-        expect(
-          response.body.user.email
-        ).toBe(failingEmail);
+        expect(response.body.user.id).toBeDefined();
 
-        const createdUser =
-          await testPrisma.user.findUnique({
-            where: {
-              email: failingEmail,
-            },
-          });
+        expect(response.body.user.email).toBe(
+          email
+        );
 
-        expect(createdUser).toBeDefined();
-
-        if (createdUser) {
-          try {
-            await testPrisma.user.delete({
-              where: {
-                id: createdUser.id,
-              },
-            });
-          } catch (error) {
-            // Ignore cleanup errors
-          }
-        }
-      }
+        createdUserIds.push(
+          response.body.user.id
+        );
+      },
+      30000
     );
   });
 });

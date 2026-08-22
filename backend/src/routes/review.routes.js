@@ -11,6 +11,8 @@ import authMiddleware from "../middlewares/auth.middleware.js";
 import validationMiddleware from "../middlewares/validation.middleware.js";
 
 import {
+  createReviewSchema,
+  reviewProductParamsSchema,
   updateReviewSchema,
   reviewIdParamsSchema,
 } from "../validators/review.validator.js";
@@ -43,6 +45,14 @@ router.get(
 router.post(
   "/products/:productId",
   authMiddleware,
+  validationMiddleware(
+    reviewProductParamsSchema,
+    "params"
+  ),
+  validationMiddleware(
+    createReviewSchema,
+    "body"
+  ),
   create
 );
 
@@ -52,6 +62,14 @@ router.post(
 router.post(
   "/product/:productId",
   authMiddleware,
+  validationMiddleware(
+    reviewProductParamsSchema,
+    "params"
+  ),
+  validationMiddleware(
+    createReviewSchema,
+    "body"
+  ),
   create
 );
 

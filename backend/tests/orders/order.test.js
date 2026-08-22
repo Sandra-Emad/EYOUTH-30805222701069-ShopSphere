@@ -206,7 +206,7 @@ describe("Order API", () => {
   });
 
   describe("Create Order", () => {
-    test("should reject creating an order for a non-existing user", async () => {
+    test("should ignore a forged userId and always create the order for the authenticated user", async () => {
       const response = await request(app)
         .post("/api/orders")
         .set(
@@ -223,11 +223,21 @@ describe("Order API", () => {
           ],
         });
 
-      expect(response.status).toBe(404);
+      expect(response.status).toBe(201);
+      expect(response.body.order.userId).toBe(customer.id);
 
-      expect(response.body.message).toBe(
-        "User not found"
-      );
+      const forgedOrderId = response.body.order.id;
+      await prisma.orderItem.deleteMany({
+        where: { orderId: forgedOrderId },
+      });
+      await prisma.order.delete({
+        where: { id: forgedOrderId },
+      });
+
+      await prisma.product.update({
+        where: { id: product.id },
+        data: { stock: 20 },
+      });
     });
 
     test("should reject an order containing a non-existing product", async () => {

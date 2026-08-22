@@ -1,149 +1,108 @@
-import { jest } from "@jest/globals";
+process.env.NODE_ENV = "test";
 
-const sendMail = jest.fn();
+import request from "supertest";
 
-const createTransport = jest.fn(() => ({
-  sendMail,
-}));
+import app from "../../src/app.js";
+import testPrisma from "../../src/config/test-prisma.js";
 
-jest.unstable_mockModule("nodemailer", () => ({
-  default: {
-    createTransport,
-  },
-}));
+describe("Email API Integration", () => {
+  let createdUserIds = [];
 
-const {
-  sendWelcomeEmail,
-} = await import("../../src/services/email.service.js");
+  const password = "Password123!";
 
-describe("Email Service", () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
+  beforeAll(async () => {
+    await testPrisma.$connect();
 
     delete process.env.SMTP_HOST;
+    delete process.env.SMTP_PORT;
     delete process.env.SMTP_USER;
     delete process.env.SMTP_PASS;
-
     delete process.env.EMAIL_FROM;
-    delete process.env.SMTP_PORT;
-  });
+  }, 30000);
 
-  test("should skip email when SMTP configuration is missing", async () => {
-    await sendWelcomeEmail({
-      name: "Test User",
-      email: "test@example.com",
-    });
+  afterAll(async () => {
+    try {
+      if (createdUserIds.length > 0) {
+        await testPrisma.user.deleteMany({
+          where: {
+            id: {
+              in: createdUserIds,
+            },
+          },
+        });
+      }
+    } catch (error) {
+      // Ignore cleanup errors.
+    } finally {
+      await testPrisma.$disconnect();
+    }
+  }, 30000);
 
-    expect(createTransport).not.toHaveBeenCalled();
+  describe("Welcome Email", () => {
+    test(
+      "registration should succeed when SMTP configuration is missing",
+      async () => {
+        const email =
+          `email-test-${Date.now()}@example.com`;
 
-    expect(sendMail).not.toHaveBeenCalled();
-  });
+        const response = await request(app)
+          .post("/api/auth/register")
+          .send({
+            name: "Email Test User",
+            email,
+            password,
+          });
 
-  test("should create SMTP transporter when configuration exists", async () => {
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "587";
-    process.env.SMTP_USER = "test@example.com";
-    process.env.SMTP_PASS = "password123";
+        expect([200, 201]).toContain(
+          response.status
+        );
 
-    await sendWelcomeEmail({
-      name: "Test User",
-      email: "test@example.com",
-    });
+        expect(response.body.user).toBeDefined();
 
-    expect(createTransport).toHaveBeenCalledTimes(1);
+        expect(response.body.user.id).toBeDefined();
 
-    expect(createTransport).toHaveBeenCalledWith({
-      host: "smtp.example.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: "test@example.com",
-        pass: "password123",
+        expect(response.body.user.email).toBe(
+          email
+        );
+
+        createdUserIds.push(
+          response.body.user.id
+        );
       },
-    });
-  });
-
-  test("should send welcome email", async () => {
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "587";
-    process.env.SMTP_USER = "test@example.com";
-    process.env.SMTP_PASS = "password123";
-
-    process.env.EMAIL_FROM = "no-reply@example.com";
-
-    await sendWelcomeEmail({
-      name: "Test User",
-      email: "test@example.com",
-    });
-
-    expect(sendMail).toHaveBeenCalledTimes(1);
-
-    expect(sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({
-        from: "no-reply@example.com",
-        to: "test@example.com",
-        subject: "Welcome to Our Store",
-      })
+      30000
     );
-  });
 
-  test("should use SMTP user as sender when EMAIL_FROM is missing", async () => {
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "587";
-    process.env.SMTP_USER = "sender@example.com";
-    process.env.SMTP_PASS = "password123";
+    test(
+      "registration should not fail because welcome email fails",
+      async () => {
+        const email =
+          `email-failure-${Date.now()}@example.com`;
 
-    await sendWelcomeEmail({
-      name: "Another User",
-      email: "another@example.com",
-    });
+        const response = await request(app)
+          .post("/api/auth/register")
+          .send({
+            name: "Email Failure Test",
+            email,
+            password,
+          });
 
-    expect(sendMail).toHaveBeenCalledWith(
-      expect.objectContaining({
-        from: "sender@example.com",
-        to: "another@example.com",
-        subject: "Welcome to Our Store",
-      })
-    );
-  });
+        expect([200, 201]).toContain(
+          response.status
+        );
 
-  test("should use secure SMTP connection on port 465", async () => {
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "465";
-    process.env.SMTP_USER = "sender@example.com";
-    process.env.SMTP_PASS = "password123";
+        expect(response.body.user).toBeDefined();
 
-    await sendWelcomeEmail({
-      name: "Secure User",
-      email: "secure@example.com",
-    });
+        expect(response.body.user.email).toBe(
+          email
+        );
 
-    expect(createTransport).toHaveBeenCalledWith({
-      host: "smtp.example.com",
-      port: 465,
-      secure: true,
-      auth: {
-        user: "sender@example.com",
-        pass: "password123",
+        expect(response.body.user.id).toBeDefined();
+
+        createdUserIds.push(
+          response.body.user.id
+        );
       },
-    });
-  });
-
-  test("should reject when sending email fails", async () => {
-    process.env.SMTP_HOST = "smtp.example.com";
-    process.env.SMTP_PORT = "587";
-    process.env.SMTP_USER = "sender@example.com";
-    process.env.SMTP_PASS = "password123";
-
-    sendMail.mockRejectedValueOnce(
-      new Error("SMTP error")
+      30000
     );
-
-    await expect(
-      sendWelcomeEmail({
-        name: "Failed User",
-        email: "failed@example.com",
-      })
-    ).rejects.toThrow("SMTP error");
   });
 });

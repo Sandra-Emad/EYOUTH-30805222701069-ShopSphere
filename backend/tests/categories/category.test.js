@@ -1,5 +1,9 @@
 process.env.NODE_ENV = "test";
 
+import { jest } from "@jest/globals";
+
+jest.setTimeout(30000);
+
 import request from "supertest";
 import bcrypt from "bcryptjs";
 

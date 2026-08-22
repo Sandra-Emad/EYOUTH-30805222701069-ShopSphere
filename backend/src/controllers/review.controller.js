@@ -54,14 +54,23 @@ export const create = async (req, res) => {
 
 export const update = async (req, res) => {
   try {
-    const error = new Error(
-      "Review update is not supported"
+    const review = await reviewService.updateReview(
+      req.params.reviewId,
+      req.user.userId,
+      req.body
     );
 
-    error.statusCode = 501;
-
-    throw error;
+    return res.status(200).json({
+      success: true,
+      message: "Review updated successfully",
+      review,
+    });
   } catch (error) {
+    console.error(
+      "Update review error:",
+      error.message
+    );
+
     return res.status(error.statusCode || 500).json({
       success: false,
       message:

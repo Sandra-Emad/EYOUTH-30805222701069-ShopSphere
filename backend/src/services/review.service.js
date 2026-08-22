@@ -183,6 +183,52 @@ const createReview = async (
   }
 };
 
+const updateReview = async (
+  reviewId,
+  userIdInput,
+  data
+) => {
+  if (!mongoose.isValidObjectId(reviewId)) {
+    throw createError("Invalid review ID", 400);
+  }
+
+  const userId = validateId(userIdInput, "user ID");
+  const review = await Review.findById(reviewId);
+
+  if (!review) {
+    throw createError("Review not found", 404);
+  }
+
+  if (review.userId !== userId) {
+    throw createError(
+      "You are not allowed to update this review",
+      403
+    );
+  }
+
+  const updateData = {};
+
+  if (data?.rating !== undefined) {
+    updateData.rating = validateRating(data.rating);
+  }
+
+  if (data?.comment !== undefined) {
+    updateData.comment = validateComment(data.comment);
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    throw createError("At least one review field is required", 400);
+  }
+
+  const updatedReview = await Review.findByIdAndUpdate(
+    reviewId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  ).lean();
+
+  return updatedReview;
+};
+
 const deleteReview = async (
   reviewId,
   userIdInput
@@ -229,5 +275,6 @@ const deleteReview = async (
 export default {
   listReviews,
   createReview,
+  updateReview,
   deleteReview,
 };

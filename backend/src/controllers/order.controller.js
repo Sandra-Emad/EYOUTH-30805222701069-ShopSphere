@@ -8,16 +8,13 @@ import orderService from "../services/order.service.js";
 
 export const create = async (req, res) => {
   try {
-    const { items, userId } = req.body;
+    const { items } = req.body;
 
     /*
-     * Use explicitly supplied userId when present.
-     * Otherwise use the authenticated user's ID.
+     * Orders always belong to the authenticated user.
+     * Never trust a userId supplied by the client.
      */
-    const requestedUserId =
-      userId !== undefined
-        ? userId
-        : req.user.userId;
+    const requestedUserId = req.user.userId;
 
     const order =
       await orderService.createOrder(

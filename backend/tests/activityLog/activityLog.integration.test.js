@@ -10,6 +10,7 @@ import ActivityLog from "../../src/models/activityLog.model.js";
 
 describe("Activity Log API Integration", () => {
   let adminToken;
+  let adminUserId;
   let prisma;
 
   const mongoUri =
@@ -76,6 +77,7 @@ describe("Activity Log API Integration", () => {
     });
 
     expect(createdUser).toBeTruthy();
+    adminUserId = createdUser.id;
 
     /*
      * Promote user to ADMIN
@@ -205,6 +207,53 @@ describe("Activity Log API Integration", () => {
       expect(response.status).toBe(400);
       expect(response.body.success).toBe(false);
     });
+  });
+
+  describe("Automatic Activity Logging", () => {
+    test(
+      "should automatically persist an activity log for an authenticated mutation",
+      async () => {
+        const marker = `activity-log-product-${Date.now()}`;
+
+        const response = await request(app)
+          .post("/api/categories")
+          .set(
+            "Authorization",
+            `Bearer ${adminToken}`
+          )
+          .send({
+            name: marker,
+            description: "Activity logger integration test",
+          });
+
+        expect(response.status).toBe(201);
+
+        const categoryId = response.body.category?.id;
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+
+        const log = await ActivityLog.findOne({
+          userId: adminUserId,
+          method: "POST",
+          endpoint: { $regex: "/api/categories" },
+          entity: "Category",
+          action: "CREATE",
+        })
+          .sort({ createdAt: -1 })
+          .lean();
+
+        expect(log).not.toBeNull();
+        expect(log.userId).toBeGreaterThan(0);
+        expect(log.details.statusCode).toBe(201);
+
+        if (categoryId) {
+          await prisma.category.delete({
+            where: { id: categoryId },
+          });
+        }
+      },
+      10000
+    );
   });
 
   describe("Activity Log Retrieval", () => {

@@ -1,5 +1,6 @@
 import authService from "../services/auth.service.js";
 import { sendWelcomeEmail } from "../services/email.service.js";
+import { createActivityLog } from "../services/activityLog.service.js";
 
 export const register = async (req, res) => {
   try {
@@ -25,6 +26,20 @@ export const register = async (req, res) => {
         emailError.message
       );
     }
+
+    await createActivityLog({
+      userId: user.id,
+      action: "REGISTER",
+      entity: "User",
+      entityId: String(user.id),
+      details: { email: user.email },
+      method: req.method,
+      endpoint: req.originalUrl,
+      ipAddress: req.ip || null,
+      userAgent: req.get("user-agent") || null,
+    }).catch((logError) => {
+      console.error("Registration activity log error:", logError.message);
+    });
 
     res.status(201).json({
       message: "User registered successfully",
@@ -54,6 +69,20 @@ export const login = async (req, res) => {
       },
       req.database
     );
+
+    await createActivityLog({
+      userId: result.user.id,
+      action: "LOGIN",
+      entity: "User",
+      entityId: String(result.user.id),
+      details: { email: result.user.email },
+      method: req.method,
+      endpoint: req.originalUrl,
+      ipAddress: req.ip || null,
+      userAgent: req.get("user-agent") || null,
+    }).catch((logError) => {
+      console.error("Login activity log error:", logError.message);
+    });
 
     res.status(200).json({
       message: "Login successful",
