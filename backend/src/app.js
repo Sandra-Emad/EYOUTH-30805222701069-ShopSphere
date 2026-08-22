@@ -9,6 +9,7 @@ import cartRoutes from "./routes/cart.routes.js";
 import orderRoutes from "./routes/order.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 import activityLogRoutes from "./routes/activityLog.routes.js";
+import statisticsRoutes from "./routes/statistics.routes.js";
 
 import { useTestDatabase } from "./middlewares/test-database.middleware.js";
 
@@ -64,13 +65,31 @@ app.get("/", (req, res) => {
 ========================= */
 
 app.use("/api/auth", authRoutes);
+
 app.use("/api/products", productRoutes);
-app.use("/api/product-images", productImageRoutes);
+
+app.use(
+  "/api/product-images",
+  productImageRoutes
+);
+
 app.use("/api/categories", categoryRoutes);
+
 app.use("/api/cart", cartRoutes);
+
 app.use("/api/orders", orderRoutes);
+
 app.use("/api/reviews", reviewRoutes);
-app.use("/api/activity-logs", activityLogRoutes);
+
+app.use(
+  "/api/activity-logs",
+  activityLogRoutes
+);
+
+app.use(
+  "/api/statistics",
+  statisticsRoutes
+);
 
 /* =========================
    404
@@ -89,11 +108,18 @@ app.use((req, res) => {
 ========================= */
 
 app.use((err, req, res, next) => {
-  console.error("Unhandled error:", err);
+  console.error(
+    "Unhandled error:",
+    err
+  );
 
-  return res.status(err.statusCode || 500).json({
+  return res.status(
+    err.statusCode || 500
+  ).json({
     success: false,
-    message: err.message || "Internal server error",
+    message:
+      err.message ||
+      "Internal server error",
   });
 });
 
