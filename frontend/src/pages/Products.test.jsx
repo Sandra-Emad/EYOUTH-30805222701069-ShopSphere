@@ -12,6 +12,10 @@ vi.mock("../hooks/useProducts", () => ({
   useProducts: vi.fn(),
 }));
 
+vi.mock("../hooks/useCategories", () => ({
+  useCategories: vi.fn(),
+}));
+
 vi.mock("../components/ProductCard", () => ({
   default: ({ product }) => (
     <article data-testid="product-card">
@@ -21,6 +25,7 @@ vi.mock("../components/ProductCard", () => ({
 }));
 
 import { useProducts } from "../hooks/useProducts";
+import { useCategories } from "../hooks/useCategories";
 
 const products = [
   {
@@ -37,12 +42,39 @@ const products = [
   },
 ];
 
+const categories = [
+  {
+    id: 8,
+    name: "Phones",
+  },
+  {
+    id: 9,
+    name: "Laptops",
+  },
+  {
+    id: 10,
+    name: "Accessories",
+  },
+];
+
 const renderProducts = () =>
   render(
     <MemoryRouter>
       <Products />
     </MemoryRouter>
   );
+
+const mockCategoriesSuccess = () => {
+  useCategories.mockReturnValue({
+    data: {
+      categories,
+    },
+    isLoading: false,
+    isError: false,
+    error: null,
+    refetch: vi.fn(),
+  });
+};
 
 describe("Products page", () => {
   it("shows loading state", () => {
@@ -53,6 +85,8 @@ describe("Products page", () => {
       error: null,
       refetch: vi.fn(),
     });
+
+    mockCategoriesSuccess();
 
     renderProducts();
 
@@ -77,6 +111,8 @@ describe("Products page", () => {
       error: null,
       refetch: vi.fn(),
     });
+
+    mockCategoriesSuccess();
 
     renderProducts();
 
@@ -108,6 +144,8 @@ describe("Products page", () => {
       refetch: vi.fn(),
     });
 
+    mockCategoriesSuccess();
+
     renderProducts();
 
     expect(
@@ -132,6 +170,18 @@ describe("Products page", () => {
       refetch,
     });
 
+    const refetchCategories = vi.fn();
+
+    useCategories.mockReturnValue({
+      data: {
+        categories,
+      },
+      isLoading: false,
+      isError: false,
+      error: null,
+      refetch: refetchCategories,
+    });
+
     renderProducts();
 
     const retryButton = screen.getByRole("button", {
@@ -141,6 +191,7 @@ describe("Products page", () => {
     await retryButton.click();
 
     expect(refetch).toHaveBeenCalledTimes(1);
+    expect(refetchCategories).toHaveBeenCalledTimes(1);
   });
 
   it("shows empty state when there are no products", () => {
@@ -153,6 +204,8 @@ describe("Products page", () => {
       error: null,
       refetch: vi.fn(),
     });
+
+    mockCategoriesSuccess();
 
     renderProducts();
 
@@ -171,6 +224,8 @@ describe("Products page", () => {
       error: null,
       refetch: vi.fn(),
     });
+
+    mockCategoriesSuccess();
 
     renderProducts();
 
@@ -197,6 +252,8 @@ describe("Products page", () => {
       error: null,
       refetch: vi.fn(),
     });
+
+    mockCategoriesSuccess();
 
     renderProducts();
 

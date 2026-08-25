@@ -1,13 +1,12 @@
 import { useMemo, useState } from "react";
-import {
-  useMutation,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import api from "../api/axios";
 import Loader from "../components/Loader";
 import ErrorMessage from "../components/ErrorMessage";
 import { useProducts } from "../hooks/useProducts";
+import { useStatistics } from "../hooks/useStatistics";
+import { useCategories } from "../hooks/useCategories";
 
 const emptyForm = {
   name: "",
@@ -17,21 +16,6 @@ const emptyForm = {
   imageUrl: "",
   categoryId: "",
 };
-
-const categories = [
-  {
-    id: 8,
-    name: "Phones",
-  },
-  {
-    id: 9,
-    name: "Laptops",
-  },
-  {
-    id: 10,
-    name: "Accessories",
-  },
-];
 
 const formatMoney = (price) => {
   return `$${Number(price || 0).toFixed(2)}`;
@@ -46,28 +30,74 @@ export default function AdminDashboard() {
   const [formError, setFormError] = useState("");
 
   const {
-    data,
-    isLoading,
-    isError,
-    error,
-    refetch,
+    data: productsData,
+    isLoading: productsLoading,
+    isError: productsError,
+    error: productsErrorObject,
+    refetch: refetchProducts,
   } = useProducts({
     page: 1,
     limit: 100,
   });
 
+  const {
+    data: statisticsData,
+    isLoading: statisticsLoading,
+    isError: statisticsError,
+    error: statisticsErrorObject,
+    refetch: refetchStatistics,
+  } = useStatistics();
+
+  const {
+    data: categoriesData,
+    isLoading: categoriesLoading,
+    isError: categoriesError,
+    error: categoriesErrorObject,
+    refetch: refetchCategories,
+  } = useCategories();
+
   const products = useMemo(() => {
     return (
-      data?.products ??
-      data?.data?.products ??
-      (Array.isArray(data) ? data : [])
+      productsData?.products ??
+      productsData?.data?.products ??
+      (Array.isArray(productsData)
+        ? productsData
+        : [])
     );
-  }, [data]);
+  }, [productsData]);
 
-  const refreshProducts = async () => {
-    await queryClient.invalidateQueries({
-      queryKey: ["products"],
-    });
+  const statistics = useMemo(() => {
+    return (
+      statisticsData?.statistics ??
+      statisticsData?.data?.statistics ??
+      {}
+    );
+  }, [statisticsData]);
+
+  const categories = useMemo(() => {
+    return (
+      categoriesData?.categories ??
+      categoriesData?.data?.categories ??
+      (Array.isArray(categoriesData)
+        ? categoriesData
+        : [])
+    );
+  }, [categoriesData]);
+
+  const refreshDashboard = async () => {
+    await Promise.all([
+      queryClient.invalidateQueries({
+        queryKey: ["products"],
+      }),
+
+      queryClient.invalidateQueries({
+        queryKey: ["statistics"],
+      }),
+
+      queryClient.invalidateQueries({
+        queryKey: ["categories"],
+      }),
+    ]);
   };
 
   const createMutation = useMutation({
@@ -77,7 +107,8 @@ export default function AdminDashboard() {
     onSuccess: async () => {
       setMessage("Product created successfully.");
       setForm(emptyForm);
-      await refreshProducts();
+
+      await refreshDashboard();
     },
 
     onError: (err) => {
@@ -96,7 +127,8 @@ export default function AdminDashboard() {
       setMessage("Product updated successfully.");
       setForm(emptyForm);
       setEditingId(null);
-      await refreshProducts();
+
+      await refreshDashboard();
     },
 
     onError: (err) => {
@@ -108,11 +140,13 @@ export default function AdminDashboard() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id) => api.delete(`/products/${id}`),
+    mutationFn: (id) =>
+      api.delete(`/products/${id}`),
 
     onSuccess: async () => {
       setMessage("Product deleted successfully.");
-      await refreshProducts();
+
+      await refreshDashboard();
     },
 
     onError: (err) => {
@@ -185,7 +219,9 @@ export default function AdminDashboard() {
       stock: String(product.stock ?? ""),
       imageUrl: product.imageUrl || "",
       categoryId: String(
-        product.categoryId ?? product.category?.id ?? ""
+        product.categoryId ??
+          product.category?.id ??
+          ""
       ),
     });
 
@@ -212,22 +248,38 @@ export default function AdminDashboard() {
     }
   };
 
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchProducts(),
+      refetchStatistics(),
+      refetchCategories(),
+    ]);
+  };
+
   const submitting =
-    createMutation.isPending || updateMutation.isPending;
+    createMutation.isPending ||
+    updateMutation.isPending;
 
   const inventory = products.reduce(
-    (sum, product) => sum + Number(product.stock || 0),
+    (sum, product) =>
+      sum + Number(product.stock || 0),
     0
   );
 
   const lowStock = products.filter(
-    (product) => Number(product.stock || 0) < 5
+    (product) =>
+      Number(product.stock || 0) < 5
   ).length;
 
   const hasMutationError =
     createMutation.isError ||
     updateMutation.isError ||
     deleteMutation.isError;
+
+  const isLoading =
+    productsLoading ||
+    statisticsLoading ||
+    categoriesLoading;
 
   if (isLoading) {
     return (
@@ -237,16 +289,25 @@ export default function AdminDashboard() {
     );
   }
 
-  if (isError) {
+  if (
+    productsError ||
+    statisticsError ||
+    categoriesError
+  ) {
     return (
       <main className="page">
         <div className="container">
           <ErrorMessage
             message={
-              error?.response?.data?.message ||
-              "Unable to load product data."
+              productsErrorObject?.response?.data
+                ?.message ||
+              statisticsErrorObject?.response?.data
+                ?.message ||
+              categoriesErrorObject?.response?.data
+                ?.message ||
+              "Unable to load dashboard data."
             }
-            onRetry={refetch}
+            onRetry={handleRefresh}
           />
         </div>
       </main>
@@ -257,29 +318,145 @@ export default function AdminDashboard() {
     <main className="page">
       <div className="container">
         <section className="page-heading">
-          <span className="eyebrow">Admin area</span>
+          <span className="eyebrow">
+            Admin area
+          </span>
 
           <h1>Store dashboard</h1>
 
           <p>
-            Add, edit, delete, and monitor your products.
+            Add, edit, delete, and monitor your
+            products and store performance.
           </p>
         </section>
 
         <section className="stat-grid">
           <div>
             <span>Products</span>
-            <strong>{products.length}</strong>
+
+            <strong>
+              {Number(
+                statistics.products ??
+                  products.length
+              )}
+            </strong>
           </div>
 
           <div>
             <span>Units in stock</span>
+
             <strong>{inventory}</strong>
           </div>
 
           <div>
             <span>Low-stock products</span>
+
             <strong>{lowStock}</strong>
+          </div>
+
+          <div>
+            <span>Customers</span>
+
+            <strong>
+              {Number(statistics.users ?? 0)}
+            </strong>
+          </div>
+
+          <div>
+            <span>Orders</span>
+
+            <strong>
+              {Number(statistics.orders ?? 0)}
+            </strong>
+          </div>
+
+          <div>
+            <span>Total revenue</span>
+
+            <strong>
+              {formatMoney(
+                statistics.revenue ?? 0
+              )}
+            </strong>
+          </div>
+        </section>
+
+        <section className="admin-panel">
+          <div className="section-heading">
+            <div>
+              <span className="eyebrow">
+                Store performance
+              </span>
+
+              <h2>Order statistics</h2>
+            </div>
+          </div>
+
+          <div className="stat-grid">
+            <div>
+              <span>Pending</span>
+
+              <strong>
+                {Number(
+                  statistics.ordersByStatus
+                    ?.pending ?? 0
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Processing</span>
+
+              <strong>
+                {Number(
+                  statistics.ordersByStatus
+                    ?.processing ?? 0
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Shipped</span>
+
+              <strong>
+                {Number(
+                  statistics.ordersByStatus
+                    ?.shipped ?? 0
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Delivered</span>
+
+              <strong>
+                {Number(
+                  statistics.ordersByStatus
+                    ?.delivered ?? 0
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Cancelled</span>
+
+              <strong>
+                {Number(
+                  statistics.ordersByStatus
+                    ?.cancelled ?? 0
+                )}
+              </strong>
+            </div>
+
+            <div>
+              <span>Categories</span>
+
+              <strong>
+                {Number(
+                  statistics.categories ?? 0
+                )}
+              </strong>
+            </div>
           </div>
         </section>
 
@@ -383,13 +560,14 @@ export default function AdminDashboard() {
                     key={category.id}
                     type="button"
                     className={
-                      Number(form.categoryId) === category.id
+                      Number(form.categoryId) ===
+                      Number(category.id)
                         ? "category-button active"
                         : "category-button"
                     }
-                    onClick={() => {
-                      selectCategory(category.id);
-                    }}
+                    onClick={() =>
+                      selectCategory(category.id)
+                    }
                   >
                     {category.name}
                   </button>
@@ -457,7 +635,7 @@ export default function AdminDashboard() {
             <button
               type="button"
               className="btn btn-outline"
-              onClick={refetch}
+              onClick={handleRefresh}
             >
               Refresh
             </button>
@@ -483,7 +661,8 @@ export default function AdminDashboard() {
                       <td>{product.name}</td>
 
                       <td>
-                        {product.category?.name || "—"}
+                        {product.category?.name ||
+                          "—"}
                       </td>
 
                       <td>
@@ -496,14 +675,18 @@ export default function AdminDashboard() {
                         {formatMoney(product.price)}
                       </td>
 
-                      <td>{product.stock ?? 0}</td>
+                      <td>
+                        {product.stock ?? 0}
+                      </td>
 
                       <td>
                         <div className="table-actions">
                           <button
                             type="button"
                             className="btn btn-outline"
-                            onClick={() => handleEdit(product)}
+                            onClick={() =>
+                              handleEdit(product)
+                            }
                           >
                             Edit
                           </button>
@@ -511,10 +694,12 @@ export default function AdminDashboard() {
                           <button
                             type="button"
                             className="btn btn-danger"
-                            disabled={deleteMutation.isPending}
-                            onClick={() => {
-                              handleDelete(product);
-                            }}
+                            disabled={
+                              deleteMutation.isPending
+                            }
+                            onClick={() =>
+                              handleDelete(product)
+                            }
                           >
                             Delete
                           </button>
@@ -530,8 +715,8 @@ export default function AdminDashboard() {
               <h2>No products yet</h2>
 
               <p>
-                Use the form above to create the first
-                product.
+                Use the form above to create the
+                first product.
               </p>
             </div>
           )}
