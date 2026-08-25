@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
+import rateLimit from "express-rate-limit";
 import path from "path";
 
 import authRoutes from "./routes/auth.routes.js";
@@ -18,26 +20,106 @@ import activityLogger from "./middlewares/activityLogger.middleware.js";
 const app = express();
 
 /* =========================
-   Global Middleware
+   Proxy
+========================= */
+
+app.set("trust proxy", 1);
+
+/* =========================
+   Security - Helmet
 ========================= */
 
 app.use(
+  helmet({
+    crossOriginResourcePolicy: {
+      policy: "cross-origin",
+    },
+  })
+);
+
+/* =========================
+   CORS
+========================= */
+
+const allowedOrigins = (
+  process.env.FRONTEND_URL ||
+  "http://localhost:5173"
+)
+  .split(",")
+  .map((origin) => origin.trim())
+  .filter(Boolean);
+
+app.use(
   cors({
-    origin: true,
+    origin(origin, callback) {
+      // Allow requests without an Origin header.
+      // This includes health checks, curl, Postman,
+      // server-to-server requests, etc.
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+
+      return callback(
+        new Error("CORS origin not allowed")
+      );
+    },
     credentials: true,
   })
 );
 
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+/* =========================
+   Rate Limiting
+========================= */
 
-/* Serve uploaded product images. */
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  limit: 100,
+  standardHeaders: "draft-8",
+  legacyHeaders: false,
+  message: {
+    success: false,
+    message: "Too many requests. Please try again later.",
+  },
+});
+
+app.use("/api", apiLimiter);
+
+/* =========================
+   Body Parsers
+========================= */
+
 app.use(
-  "/uploads",
-  express.static(path.join(process.cwd(), "uploads"))
+  express.json({
+    limit: "1mb",
+  })
 );
 
-/* Automatically record authenticated write operations in MongoDB. */
+app.use(
+  express.urlencoded({
+    extended: true,
+    limit: "1mb",
+  })
+);
+
+/* =========================
+   Static Files
+========================= */
+
+app.use(
+  "/uploads",
+  express.static(
+    path.join(process.cwd(), "uploads")
+  )
+);
+
+/* =========================
+   Activity Logger
+========================= */
+
 app.use(activityLogger);
 
 /* =========================
@@ -51,6 +133,15 @@ if (process.env.NODE_ENV === "test") {
 /* =========================
    Health Check
 ========================= */
+
+app.get("/health", (req, res) => {
+  return res.status(200).json({
+    success: true,
+    message: "API is healthy",
+    status: "OK",
+    timestamp: new Date().toISOString(),
+  });
+});
 
 app.get("/api/health", (req, res) => {
   return res.status(200).json({
@@ -67,7 +158,9 @@ app.get("/api/health", (req, res) => {
 
 app.get("/", (req, res) => {
   return res.status(200).json({
-    message: "E-Commerce API is running",
+    success: true,
+    service: "ShopSphere Backend API",
+    message: "ShopSphere API is running",
   });
 });
 
@@ -84,7 +177,10 @@ app.use(
   productImageRoutes
 );
 
-app.use("/api/categories", categoryRoutes);
+app.use(
+  "/api/categories",
+  categoryRoutes
+);
 
 app.use("/api/cart", cartRoutes);
 

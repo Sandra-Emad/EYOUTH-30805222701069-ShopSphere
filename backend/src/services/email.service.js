@@ -21,6 +21,28 @@ const createTransporter = () => {
   });
 };
 
+/**
+ * Verify SMTP connection.
+ *
+ * Returns false when SMTP configuration is missing,
+ * instead of crashing the application.
+ */
+export const verifyEmailConnection = async () => {
+  const transporter = createTransporter();
+
+  if (!transporter) {
+    console.warn(
+      "Email service verification skipped: SMTP configuration is missing."
+    );
+
+    return false;
+  }
+
+  await transporter.verify();
+
+  return true;
+};
+
 export const sendWelcomeEmail = async ({ name, email }) => {
   const transporter = createTransporter();
 
@@ -28,6 +50,7 @@ export const sendWelcomeEmail = async ({ name, email }) => {
     console.warn(
       "Welcome email skipped: SMTP configuration is missing."
     );
+
     return;
   }
 
@@ -38,24 +61,30 @@ export const sendWelcomeEmail = async ({ name, email }) => {
   await transporter.sendMail({
     from,
     to: email,
-    subject: "Welcome to Our Store",
+    subject: "Welcome to ShopSphere",
     text: `Hello ${name},
 
-Welcome to our store!
+Welcome to ShopSphere!
 
 Your account has been created successfully.
 
 Thank you for joining us.`,
     html: `
-      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
-        <h2>Welcome to Our Store, ${name}!</h2>
+      <div
+        style="
+          font-family: Arial, sans-serif;
+          line-height: 1.6;
+          color: #111827;
+        "
+      >
+        <h2>Welcome to ShopSphere, ${name}!</h2>
 
         <p>
           Your account has been created successfully.
         </p>
 
         <p>
-          Thank you for joining us.
+          Thank you for joining ShopSphere.
         </p>
       </div>
     `,
@@ -64,4 +93,5 @@ Thank you for joining us.`,
 
 export default {
   sendWelcomeEmail,
+  verifyEmailConnection,
 };
