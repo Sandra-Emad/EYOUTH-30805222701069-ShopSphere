@@ -16,25 +16,22 @@ import "./App.css";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: 1,
+      retry: false,
       refetchOnWindowFocus: false,
-      staleTime: 30_000,
     },
   },
 });
 
-ReactDOM.createRoot(
-  document.getElementById("root")
-).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+    <BrowserRouter>
+      <QueryClientProvider client={queryClient}>
         <AuthProvider>
           <CartProvider>
             <App />
           </CartProvider>
         </AuthProvider>
-      </BrowserRouter>
-    </QueryClientProvider>
+      </QueryClientProvider>
+    </BrowserRouter>
   </React.StrictMode>
 );
