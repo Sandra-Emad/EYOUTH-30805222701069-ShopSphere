@@ -1,28 +1,66 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap");
+
+:root {
+  font-family: "DM Sans", sans-serif;
+  color: #172033;
+  background: #f7f8fc;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
 
 * {
   box-sizing: border-box;
 }
 
 html {
-  color: #14213d;
-  background: #f7faff;
+  min-width: 320px;
+  min-height: 100%;
+  background: #f7f8fc;
+  scroll-behavior: smooth;
 }
 
 body {
-  margin: 0;
   min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(
+      circle at 15% 0%,
+      rgba(99, 102, 241, 0.05),
+      transparent 28%
+    ),
+    #f7f8fc;
+  font-family: "DM Sans", sans-serif;
+}
+
+body,
+button,
+input,
+select,
+textarea {
   font-family: "DM Sans", sans-serif;
 }
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
 button {
   cursor: pointer;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(99, 102, 241, 0.28);
+  outline-offset: 2px;
 }
 
 a {
@@ -38,12 +76,42 @@ img {
 h1,
 h2,
 h3,
+h4,
+h5,
+h6,
 p {
   margin-top: 0;
 }
 
 h1,
 h2,
-h3 {
-  line-height: 1.1;
+h3,
+h4,
+h5,
+h6 {
+  line-height: 1.12;
+  font-family: "Manrope", sans-serif;
+}
+
+::selection {
+  color: #ffffff;
+  background: #5b5ce2;
+}
+
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+
+::-webkit-scrollbar-track {
+  background: #eef0f7;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: #c7c9d8;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ea2bb;
 }
