@@ -37,7 +37,7 @@ describe("Navbar", () => {
 
     renderNavbar();
 
-    expect(screen.getByText("BlueCart")).toBeInTheDocument();
+    expect(screen.getByText("ShopSphere")).toBeInTheDocument();
     expect(screen.getByText("Home")).toBeInTheDocument();
     expect(screen.getByText("Products")).toBeInTheDocument();
     expect(screen.getByText("Cart")).toBeInTheDocument();

@@ -64,7 +64,7 @@ export default function AuthForm({ register = false }) {
   return (
     <main className="page auth-page">
       <form className="auth-card" onSubmit={handleSubmit}>
-        <span className="eyebrow">BlueCart account</span>
+        <span className="eyebrow">ShopSphere account</span>
 
         <h1>
           {register
@@ -140,7 +140,7 @@ export default function AuthForm({ register = false }) {
         <p className="auth-switch">
           {register
             ? "Already have an account?"
-            : "New to BlueCart?"}{" "}
+            : "New to ShopSphere?"}{" "}
           <Link to={register ? "/login" : "/register"}>
             {register ? "Login" : "Create one"}
           </Link>

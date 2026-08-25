@@ -27,7 +27,7 @@ export default function Navbar() {
     <header className="navbar">
       <div className="container navbar-inner">
         <Link className="brand" to="/">
-          BlueCart
+          ShopSphere
         </Link>
 
         <nav className="nav-links">
