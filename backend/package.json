@@ -1,7 +1,7 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "Full-Stack E-Commerce Platform Backend",
+  "description": "ShopSphere Enterprise e-commerce platform backend",
   "main": "src/server.js",
   "type": "module",
   "scripts": {
@@ -17,6 +17,7 @@
     "seed": "node prisma/seed.js"
   },
   "keywords": [
+    "shopsphere",
     "ecommerce",
     "express",
     "prisma",

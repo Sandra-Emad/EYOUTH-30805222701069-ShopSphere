@@ -1,20 +1,27 @@
-# Full-Stack E-Commerce Platform — Frontend
+# EYOUTH-30805222701069-ShopSphere — Frontend
 
 ## Overview
 
-This folder contains the frontend application for the Full-Stack E-Commerce Platform.
+This folder contains the frontend application for the EYOUTH-30805222701069-ShopSphere.
 
 The frontend provides the user interface for customers and administrators and communicates with the backend through REST APIs.
 
 ## Technologies
 
 * React
+
 * Vite
+
 * React Router
+
 * Axios
+
 * TanStack React Query
+
 * React Context API
+
 * JavaScript
+
 * CSS
 
 ## Main Features
@@ -22,24 +29,39 @@ The frontend provides the user interface for customers and administrators and co
 ### Customer Features
 
 * Home page
+
 * Product listing
+
 * Product details
+
 * Product search
+
 * Product filtering
+
 * Product sorting
+
 * Product pagination
+
 * Shopping cart
+
 * User registration and login
+
 * User profile
+
 * Order management
 
 ### Admin Features
 
 * Protected admin dashboard
+
 * Product management
+
 * Category management
+
 * Order management
+
 * Store statistics
+
 * Role-based access control
 
 ## Frontend Architecture
@@ -48,18 +70,29 @@ The frontend is organized into separate areas for API communication, components,
 
 ```text
 src/
+
 ├── api/
+
 ├── components/
+
 ├── context/
+
 ├── hooks/
+
 ├── layouts/
-├── lib/
+
 ├── pages/
+
 ├── routes/
+
 ├── utils/
+
 ├── App.jsx
+
 ├── App.css
+
 ├── index.css
+
 └── main.jsx
 ```
 
@@ -76,6 +109,7 @@ Axios is also configured to handle authenticated requests and JWT-based authenti
 The application uses:
 
 * React Context API for shared application state
+
 * TanStack React Query for server state, API requests, caching, and data synchronization
 
 ## Routing
@@ -91,11 +125,17 @@ Protected routes are used for authenticated and administrator-only pages.
 The frontend supports:
 
 * User registration
+
 * User login
+
 * User logout
+
 * JWT authentication
+
 * Protected routes
+
 * Role-based access control
+
 * User profile management
 
 Customers and administrators have different access permissions.
@@ -132,4 +172,4 @@ The frontend requires the backend API to be running and properly configured in o
 
 ## Project Purpose
 
-This frontend is part of a full-stack e-commerce application built to provide a complete shopping experience with customer and administrator functionality.
+This frontend is part of the EYOUTH-30805222701069-ShopSphere full-stack e-commerce application built to provide a complete shopping experience with customer and administrator functionality.

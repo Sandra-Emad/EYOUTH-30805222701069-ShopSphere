@@ -1,8 +1,8 @@
-# Full-Stack E-Commerce Platform
+# EYOUTH-30805222701069-ShopSphere
 
 ## 1. Project Overview
 
-Full-Stack E-Commerce Platform is a complete online shopping application designed to provide customers with a smooth shopping experience and administrators with tools to manage the store.
+EYOUTH-30805222701069-ShopSphere is a complete online shopping application designed to provide customers with a smooth shopping experience and administrators with tools to manage the store.
 
 The project includes:
 
@@ -65,8 +65,7 @@ The project includes:
 
 The project is separated into two main applications:
 
-```text
-Full-Stack E-Commerce Platform/
+EYOUTH-30805222701069-ShopSphere/
 │
 ├── backend/
 │   ├── prisma/
@@ -83,7 +82,6 @@ Full-Stack E-Commerce Platform/
 │   └── ...
 │
 └── README.txt
-```
 
 The Backend and Frontend are independent applications and can be started separately during development.
 
@@ -93,7 +91,6 @@ The Backend and Frontend are independent applications and can be started separat
 
 The backend follows a structured architecture containing:
 
-```text
 src/
 ├── config/
 ├── controllers/
@@ -105,7 +102,6 @@ src/
 ├── validators/
 ├── app.js
 └── server.js
-```
 
 ### Controllers
 
@@ -148,10 +144,8 @@ Passwords are securely hashed using bcryptjs.
 
 The system supports two roles:
 
-```text
 CUSTOMER
 ADMIN
-```
 
 Role-based access control prevents customers from accessing administrator-only resources.
 
@@ -206,7 +200,7 @@ The seed creates:
 
 Email:
 
-[admin@store.com](mailto:admin@store.com)
+admin@store.com
 
 Password:
 
@@ -220,7 +214,7 @@ ADMIN
 
 Email:
 
-[customer@store.com](mailto:customer@store.com)
+customer@store.com
 
 Password:
 
@@ -301,9 +295,7 @@ Product images are associated with their corresponding products and can be store
 
 Uploaded product files are stored under:
 
-```text
 backend/uploads/products/
-```
 
 ---
 
@@ -315,13 +307,11 @@ Each order belongs to a user and contains one or more order items.
 
 Orders support different statuses:
 
-```text
 PENDING
 PROCESSING
 SHIPPED
 DELIVERED
 CANCELLED
-```
 
 ---
 
@@ -363,13 +353,11 @@ The statistics functionality is implemented through dedicated controllers, servi
 
 Sensitive configuration values must be stored in environment variables.
 
-The backend uses a `.env` file for configuration such as:
+The backend uses a .env file for configuration such as:
 
-```text
 DATABASE_URL=
 MONGO_URI=
 JWT_SECRET=
-```
 
 Email configuration and other sensitive credentials should also be stored in environment variables when required.
 
@@ -381,37 +369,27 @@ Do not commit real passwords, API keys, database credentials, or JWT secrets to 
 
 Open a terminal inside the backend directory:
 
-```bash
 cd backend
-```
 
 Install the dependencies:
 
-```bash
 npm install
-```
 
-Create the backend `.env` file and configure the required environment variables.
+Create the backend .env file and configure the required environment variables.
 
 Run Prisma migrations:
 
-```bash
 npx prisma migrate dev
-```
 
 Generate the Prisma Client:
 
-```bash
 npx prisma generate
-```
 
 Run the database seed:
 
-```bash
 npx prisma db seed
-```
 
-Start the backend server using the project scripts defined in `package.json`.
+Start the backend server using the project scripts defined in package.json.
 
 ---
 
@@ -419,17 +397,13 @@ Start the backend server using the project scripts defined in `package.json`.
 
 Open a second terminal and move to the frontend directory:
 
-```bash
 cd frontend
-```
 
 Install dependencies:
 
-```bash
 npm install
-```
 
-Start the Vite development server using the project scripts defined in `package.json`.
+Start the Vite development server using the project scripts defined in package.json.
 
 ---
 
@@ -454,9 +428,7 @@ The test suite covers important areas including:
 
 Run the backend test suite with:
 
-```bash
 npm test
-```
 
 A successful test run should report all implemented test suites and tests as passing.
 
@@ -528,7 +500,7 @@ The goal of this project is to provide a complete full-stack e-commerce platform
 
 ## 25. Important Notes
 
-Never commit the `.env` file containing real credentials or secrets.
+Never commit the .env file containing real credentials or secrets.
 
 For evaluation, make sure that:
 

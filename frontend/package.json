@@ -2,6 +2,7 @@
   "name": "frontend",
   "private": true,
   "version": "1.0.0",
+  "description": "ShopSphere Enterprise e-commerce platform frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",
