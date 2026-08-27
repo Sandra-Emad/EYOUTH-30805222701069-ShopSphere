@@ -1,0 +1,21 @@
+SHOPSPHERE – CLOUD SERVICE CLASSIFICATION
+
+Student ID: EYOUTH-30805222701069
+
+1. FRONTEND HOSTING
+Provider: Vercel
+Service Model: PaaS
+Reason: Vercel provides a managed platform for building, deploying, and serving the frontend without managing servers or infrastructure.
+
+2. BACKEND HOSTING
+Provider: Vercel
+Service Model: PaaS
+Reason: Vercel provides a managed execution and deployment platform for the backend without requiring server or operating-system management.
+
+3. PRODUCTION DATABASE
+Provider: Supabase PostgreSQL
+Service Model: PaaS
+Reason: Supabase provides a managed PostgreSQL database service, handling the database infrastructure while the application uses the database through its platform.
+
+PRODUCTION ARCHITECTURE
+Vercel Frontend → Vercel Backend → Supabase PostgreSQL
