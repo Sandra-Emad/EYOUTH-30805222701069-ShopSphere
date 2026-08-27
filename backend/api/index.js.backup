@@ -2,11 +2,9 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import prisma from "../src/config/prisma.js";
 import connectMongoDB from "../src/config/mongodb.js";
 
 let mongoPromise = null;
-let prismaPromise = null;
 let appPromise = null;
 
 const loadApp = async () => {
@@ -33,28 +31,10 @@ const connectMongo = async () => {
   return mongoPromise;
 };
 
-const connectPrisma = async () => {
-  if (!prismaPromise) {
-    prismaPromise = prisma.$connect().catch((error) => {
-      prismaPromise = null;
-      throw error;
-    });
-  }
-
-  return prismaPromise;
-};
-
 export default async function handler(req, res) {
   try {
     const app = await loadApp();
 
-    // PostgreSQL / Prisma
-    await connectPrisma();
-
-    // Make Prisma available to controllers/services through req.database
-    req.database = prisma;
-
-    // MongoDB / Mongoose
     await connectMongo();
 
     return app(req, res);
