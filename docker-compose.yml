@@ -1,26 +1,4 @@
 services:
-  postgres:
-    image: postgres:16
-    container_name: ecommerce-postgres
-    restart: unless-stopped
-    environment:
-      POSTGRES_DB: ecommerce_db1
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-    ports:
-      - "5432:5432"
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "pg_isready -U postgres -d ecommerce_db1"
-        ]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-
   mongo:
     image: mongo:8
     container_name: ecommerce-mongo
@@ -29,6 +7,15 @@ services:
       - "27017:27017"
     volumes:
       - mongo_data:/data/db
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh --quiet --eval \"db.adminCommand('ping').ok\" | grep 1"
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   backend:
     build:
@@ -38,22 +25,22 @@ services:
     restart: unless-stopped
     ports:
       - "5000:5000"
+
     env_file:
       - ./backend/.env
+
     environment:
       NODE_ENV: development
-      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ecommerce_db1
       MONGODB_URI: mongodb://mongo:27017/ecommerce_db1
+
     volumes:
-      - ./backend:/app
-      - /app/node_modules
       - ./backend/uploads:/app/uploads
+
     depends_on:
-      postgres:
-        condition: service_healthy
       mongo:
-        condition: service_started
-    command: sh -c "npx prisma generate && npm run dev"
+        condition: service_healthy
+
+    command: npm run dev
 
   frontend:
     build:
@@ -63,16 +50,19 @@ services:
     restart: unless-stopped
     ports:
       - "5173:5173"
+
     environment:
       VITE_API_URL: http://localhost:5000/api
       VITE_ENABLE_MSW: "false"
+
     volumes:
       - ./frontend:/app
       - /app/node_modules
+
     depends_on:
       - backend
+
     command: npm run dev -- --host 0.0.0.0
 
 volumes:
-  postgres_data:
   mongo_data:
