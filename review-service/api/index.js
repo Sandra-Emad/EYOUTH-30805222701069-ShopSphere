@@ -46,6 +46,11 @@ const Review =
 
 let connected = false;
 
+const getAuthenticatedUserId = (req) => {
+  const userId = Number(req.headers["x-user-id"]);
+  return Number.isInteger(userId) && userId > 0 ? userId : null;
+};
+
 async function connectDatabase() {
   if (connected) return;
 
@@ -203,6 +208,143 @@ app.post("/api/reviews/products/:productId", async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Failed to create review"
+    });
+  }
+});
+
+app.patch("/api/reviews/:reviewId", async (req, res) => {
+  try {
+    await connectDatabase();
+
+    const userId = getAuthenticatedUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required"
+      });
+    }
+
+    const { reviewId } = req.params;
+    if (!mongoose.isValidObjectId(reviewId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid review ID"
+      });
+    }
+
+    const updateData = {};
+
+    if (req.body?.rating !== undefined) {
+      const rating = Number(req.body.rating);
+      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
+        return res.status(400).json({
+          success: false,
+          message: "Rating must be an integer between 1 and 5"
+        });
+      }
+      updateData.rating = rating;
+    }
+
+    if (req.body?.comment !== undefined) {
+      const comment = String(req.body.comment || "").trim();
+      if (!comment) {
+        return res.status(400).json({
+          success: false,
+          message: "Comment is required"
+        });
+      }
+      if (comment.length > 1000) {
+        return res.status(400).json({
+          success: false,
+          message: "Comment must not exceed 1000 characters"
+        });
+      }
+      updateData.comment = comment;
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: "At least one review field is required"
+      });
+    }
+
+    const review = await Review.findOneAndUpdate(
+      { _id: reviewId, userId },
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).lean();
+
+    if (!review) {
+      const exists = await Review.exists({ _id: reviewId });
+      return res.status(exists ? 403 : 404).json({
+        success: false,
+        message: exists
+          ? "You are not allowed to update this review"
+          : "Review not found"
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Review updated successfully",
+      review
+    });
+  } catch (error) {
+    console.error("Update review error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to update review"
+    });
+  }
+});
+
+app.delete("/api/reviews/:reviewId", async (req, res) => {
+  try {
+    await connectDatabase();
+
+    const userId = getAuthenticatedUserId(req);
+    if (!userId) {
+      return res.status(401).json({
+        success: false,
+        message: "User authentication required"
+      });
+    }
+
+    const { reviewId } = req.params;
+    if (!mongoose.isValidObjectId(reviewId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid review ID"
+      });
+    }
+
+    const review = await Review.findOne({
+      _id: reviewId,
+      userId
+    });
+
+    if (!review) {
+      const exists = await Review.exists({ _id: reviewId });
+      return res.status(exists ? 403 : 404).json({
+        success: false,
+        message: exists
+          ? "You are not allowed to delete this review"
+          : "Review not found"
+      });
+    }
+
+    await Review.deleteOne({ _id: reviewId, userId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Review deleted successfully"
+    });
+  } catch (error) {
+    console.error("Delete review error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to delete review"
     });
   }
 });

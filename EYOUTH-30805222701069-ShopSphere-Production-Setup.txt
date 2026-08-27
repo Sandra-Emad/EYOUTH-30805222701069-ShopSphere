@@ -1,0 +1,105 @@
+SHOPSPHERE – PRODUCTION SETUP CHECKLIST
+Student ID: EYOUTH-30805222701069
+
+Use this document after extracting the ZIP. It is a setup checklist; replace every [PLACEHOLDER] with your real values.
+
+1. LOCAL INSTALL
+Open Git Bash in the project root:
+  cd backend && npm install
+  cd ../frontend && npm install
+  cd ../review-service && npm install
+  cd ../serverless-function && npm install
+
+2. LOCAL ENVIRONMENT FILES
+Copy:
+  backend/.env.example -> backend/.env
+  frontend/.env.example -> frontend/.env
+  review-service/.env.example -> review-service/.env
+  serverless-function/.env.example -> serverless-function/.env
+
+Put real local PostgreSQL, MongoDB and JWT values in the files. Never commit them.
+
+3. DATABASE
+For production, create PostgreSQL on Supabase and MongoDB for the Review Service.
+Set the production DATABASE_URL to Supabase.
+Set MONGODB_URI for the independently deployed Review Service.
+Run Prisma migrations against production before using the deployed backend:
+  cd backend
+  npx prisma migrate deploy
+
+4. VERCEL PROJECTS
+Create four Vercel projects from:
+  frontend/
+  backend/
+  review-service/
+  serverless-function/
+
+Configure each project's Production environment variables. Do not place production secrets in Git.
+
+Backend production variables:
+  NODE_ENV=production
+  DATABASE_URL=[SUPABASE POSTGRES CONNECTION STRING]
+  MONGODB_URI=[MONGODB ATLAS CONNECTION STRING]
+  JWT_SECRET=[LONG RANDOM SECRET]
+  FRONTEND_URL=[PUBLIC FRONTEND URL]
+  REVIEW_SERVICE_URL=[PUBLIC REVIEW SERVICE URL]
+  Email variables if email is enabled
+
+Frontend:
+  VITE_API_URL=[PUBLIC BACKEND URL]/api
+
+Review Service:
+  NODE_ENV=production
+  MONGODB_URI=[REVIEW MONGODB CONNECTION STRING]
+
+Serverless Function:
+  DATABASE_URL=[SUPABASE POSTGRES CONNECTION STRING]
+  CRON_SECRET=[LONG RANDOM SECRET]
+  LOW_STOCK_THRESHOLD=5
+
+5. DEPLOY ONCE MANUALLY
+Deploy each project once from its directory using Vercel CLI, or connect each project to GitHub.
+After deployment, verify:
+  [BACKEND]/api/health
+  [FRONTEND]
+  [REVIEW SERVICE]/api/health
+  [SERVERLESS]/api/low-stock-report (with its authorization when CRON_SECRET is configured)
+
+6. GITHUB ACTIONS
+Create a GitHub repository named:
+  EYOUTH-30805222701069-ShopSphere
+
+Add these GitHub Actions secrets:
+  VERCEL_TOKEN
+  VERCEL_ORG_ID
+  VERCEL_FRONTEND_PROJECT_ID
+  VERCEL_BACKEND_PROJECT_ID
+  VERCEL_REVIEW_PROJECT_ID
+  VERCEL_SERVERLESS_PROJECT_ID
+  JWT_SECRET
+  TEST_DATABASE_URL
+  TEST_MONGODB_URI
+
+Add this repository variable:
+  VITE_API_URL=[PUBLIC BACKEND URL]/api
+
+Create GitHub Environments named:
+  development
+  staging
+  production
+
+Keep environment variables separate for each environment. The workflow deploys only after the validation job succeeds.
+
+7. BRANCH PROTECTION
+Protect main so a pull request/merge cannot enter main until the required CI/CD status check succeeds.
+
+8. MONITORING
+Create an UptimeRobot HTTP monitor for:
+  [PUBLIC BACKEND URL]/api/health
+Verify that it reports UP.
+
+9. FINAL RUBRIC CHECK
+Task 1: public frontend + backend, Supabase reads/writes, no repository secrets, HTTPS/CORS/Helmet/rate limit active, health monitor UP.
+Task 2: architecture diagram, service classification, both Kubernetes namespaces, pods/services, port-forward responses, namespace isolation.
+Task 3: independently deployed Review Service, REST communication, working end-to-end app, deployed serverless function, one-page ADR.
+Task 4: development/staging/production environments, successful install/build/deploy workflow, GitHub secrets, protected main, structured logs, one-page rollback plan, shareable links document.

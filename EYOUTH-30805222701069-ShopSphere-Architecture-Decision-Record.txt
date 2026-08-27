@@ -1,0 +1,19 @@
+SHOPSPHERE – ARCHITECTURE DECISION RECORD
+Student ID: EYOUTH-30805222701069
+
+Decision
+The Reviews functionality is extracted from the main ShopSphere application into an independently deployed Review Service. ShopSphere communicates with it through REST endpoints.
+
+Why this service
+Reviews are a focused, independently deployable capability with their own MongoDB data model. Separating them reduces coupling in the main application and allows the review workload to be deployed and scaled independently.
+
+Serverless workload
+A scheduled low-stock report is moved to a Vercel Serverless Function. The function reads the production PostgreSQL catalog, calculates the number of low-stock products and units, and returns/logs the report.
+
+Why serverless
+The low-stock report is periodic and event-driven rather than part of a user's normal request journey. A scheduled serverless function can execute only when needed without keeping a dedicated background process running.
+
+Production shape
+Main application: Vercel Frontend → Vercel Backend → Supabase PostgreSQL
+Review path: Vercel Backend → independently deployed Review Service → MongoDB
+Background workload: Vercel Cron → Serverless Function → Supabase PostgreSQL

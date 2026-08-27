@@ -1,0 +1,17 @@
+{
+  "name": "shopsphere-low-stock-function",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vercel dev",
+    "start": "vercel dev"
+  },
+  "dependencies": {
+    "pg": "^8.23.0"
+  },
+  "devDependencies": {
+    "@vercel/node": "^9.0.1",
+    "vercel": "^48.5.0"
+  }
+}

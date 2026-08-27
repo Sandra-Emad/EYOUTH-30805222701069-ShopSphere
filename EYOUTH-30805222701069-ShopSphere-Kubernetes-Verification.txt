@@ -1,0 +1,26 @@
+SHOPSPHERE – KUBERNETES VERIFICATION
+Student ID: EYOUTH-30805222701069
+
+Apply:
+  kubectl apply -f k8s/EYOUTH-30805222701069-ShopSphere-MultiCloud.yaml
+
+Check namespaces:
+  kubectl get namespaces
+  kubectl get pods,services -n aws-simulation
+  kubectl get pods,services -n gcp-simulation
+
+Port-forward frontend:
+  kubectl port-forward service/frontend-service 8081:80 -n aws-simulation
+  kubectl port-forward service/frontend-service 8082:80 -n gcp-simulation
+
+Port-forward backend:
+  kubectl port-forward service/backend-service 8083:80 -n aws-simulation
+  kubectl port-forward service/backend-service 8084:80 -n gcp-simulation
+
+Open the forwarded frontend addresses in a browser and request the backend forwarded addresses from a second terminal.
+
+Isolation verification:
+  kubectl get pods,services -n aws-simulation
+  kubectl get pods,services -n gcp-simulation
+
+The same resource names are intentionally used in different namespaces. Resources from one namespace are scoped to that namespace and do not appear in the other namespace's listing.

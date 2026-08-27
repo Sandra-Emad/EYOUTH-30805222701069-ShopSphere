@@ -1,0 +1,535 @@
+# EYOUTH-30805222701069-ShopSphere
+
+## 1. Project Overview
+
+EYOUTH-30805222701069-ShopSphere is a complete online shopping application designed to provide customers with a smooth shopping experience and administrators with tools to manage the store.
+
+The project includes:
+
+* User registration and authentication
+* JWT-based authorization
+* Customer and Admin roles
+* User profile management
+* Product management
+* Category management
+* Product search, filtering, sorting, and pagination
+* Shopping cart management
+* Product image management and upload
+* Orders and order items
+* Product reviews
+* Activity logs
+* Store statistics
+* Welcome email functionality
+* PostgreSQL database with Prisma ORM
+* MongoDB for reviews and activity logs
+* Automated backend testing
+
+---
+
+## 2. Technologies Used
+
+### Frontend
+
+* React
+* Vite
+* React Router
+* Axios
+* TanStack React Query
+* React Context API
+
+### Backend
+
+* Node.js
+* Express.js
+* JWT
+* bcryptjs
+* Prisma ORM
+* Jest
+* Supertest
+* Nodemailer
+
+### Databases
+
+* PostgreSQL
+* MongoDB
+
+### Other Technologies
+
+* Docker
+* Docker Compose
+* Git / GitHub
+
+---
+
+## 3. Project Structure
+
+The project is separated into two main applications:
+
+EYOUTH-30805222701069-ShopSphere/
+│
+├── backend/
+│   ├── prisma/
+│   ├── src/
+│   ├── tests/
+│   ├── uploads/
+│   ├── package.json
+│   └── ...
+│
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   ├── package.json
+│   └── ...
+│
+└── EYOUTH-30805222701069-ShopSphere-README.txt
+
+The Backend and Frontend are independent applications and can be started separately during development.
+
+---
+
+## 4. Backend Architecture
+
+The backend follows a structured architecture containing:
+
+src/
+├── config/
+├── controllers/
+├── middlewares/
+├── models/
+├── routes/
+├── services/
+├── utils/
+├── validators/
+├── app.js
+└── server.js
+
+### Controllers
+
+Controllers handle incoming requests and return appropriate responses.
+
+### Services
+
+Services contain the main business logic of the application.
+
+### Routes
+
+Routes define the available API endpoints.
+
+### Middlewares
+
+Middleware is used for:
+
+* Authentication
+* Authorization
+* Role-based access control
+* Validation
+* Error handling
+* File uploads
+
+---
+
+## 5. Authentication & Authorization
+
+The application uses JWT-based authentication.
+
+Users can:
+
+* Register
+* Login
+* Logout
+* View their profile
+* Update their profile
+
+Passwords are securely hashed using bcryptjs.
+
+The system supports two roles:
+
+CUSTOMER
+ADMIN
+
+Role-based access control prevents customers from accessing administrator-only resources.
+
+Protected API endpoints require valid authentication credentials.
+
+Invalid, missing, or unauthorized authentication requests are rejected.
+
+---
+
+## 6. Database Design
+
+### PostgreSQL
+
+PostgreSQL is used as the main relational database.
+
+Prisma ORM manages the database schema and relationships.
+
+The main Prisma models include:
+
+* User
+* Category
+* Product
+* ProductImage
+* Order
+* OrderItem
+* Cart
+* CartItem
+
+The project also defines:
+
+* Role enum
+* OrderStatus enum
+
+### MongoDB
+
+MongoDB is used for:
+
+* Product Reviews
+* Activity Logs
+
+This allows the application to store and retrieve review and activity-log information using MongoDB.
+
+---
+
+## 7. Seed Data
+
+The project includes Prisma seed data so the application can be started with sample users, categories, and products.
+
+The seed creates:
+
+### Admin Account
+
+Email:
+
+admin@store.com
+
+Password:
+
+Admin@12345
+
+Role:
+
+ADMIN
+
+### Customer Account
+
+Email:
+
+customer@store.com
+
+Password:
+
+Customer@12345
+
+Role:
+
+CUSTOMER
+
+### Sample Categories
+
+* Phones
+* Laptops
+* Accessories
+
+### Sample Products
+
+* iPhone 15
+* Samsung Galaxy S24
+* MacBook Air M3
+* Dell Inspiron 15
+* Wireless Mouse
+* USB-C Hub
+
+---
+
+## 8. Product Management
+
+The backend provides product management APIs supporting:
+
+* Create product
+* Get products
+* Get product details
+* Update product
+* Delete product
+
+Products can also be:
+
+* Searched
+* Filtered
+* Sorted
+* Paginated
+* Associated with categories
+
+---
+
+## 9. Category Management
+
+Categories can be created and managed through the backend.
+
+Each product is associated with a category.
+
+The database maintains the relationship between categories and products through Prisma relations.
+
+---
+
+## 10. Shopping Cart
+
+The shopping cart supports:
+
+* Adding products
+* Updating product quantities
+* Removing products
+* Retrieving cart contents
+* Calculating the cart total
+
+Each customer has their own cart.
+
+A product cannot appear more than once as a separate cart item for the same cart.
+
+---
+
+## 11. Product Images
+
+The application supports product image management.
+
+Product images are associated with their corresponding products and can be stored and retrieved through the product image APIs.
+
+Uploaded product files are stored under:
+
+backend/uploads/products/
+
+---
+
+## 12. Orders
+
+The database supports orders and order items.
+
+Each order belongs to a user and contains one or more order items.
+
+Orders support different statuses:
+
+PENDING
+PROCESSING
+SHIPPED
+DELIVERED
+CANCELLED
+
+---
+
+## 13. Reviews & Activity Logs
+
+MongoDB is used for storing:
+
+### Reviews
+
+Customers can create and retrieve product reviews.
+
+### Activity Logs
+
+The application records activity information that can be used for administrative monitoring and auditing.
+
+---
+
+## 14. Welcome Email
+
+The backend includes an email service using Nodemailer.
+
+The service is responsible for sending a welcome message after user registration.
+
+Email-related functionality is covered by automated tests.
+
+---
+
+## 15. Store Statistics
+
+The backend provides statistics APIs for store management.
+
+These APIs can provide information used by the administrator dashboard.
+
+The statistics functionality is implemented through dedicated controllers, services, and routes.
+
+---
+
+## 16. Environment Variables
+
+Sensitive configuration values must be stored in environment variables.
+
+The backend uses a .env file for configuration such as:
+
+DATABASE_URL=
+MONGO_URI=
+JWT_SECRET=
+
+Email configuration and other sensitive credentials should also be stored in environment variables when required.
+
+Do not commit real passwords, API keys, database credentials, or JWT secrets to GitHub.
+
+---
+
+## 17. Backend Installation
+
+Open a terminal inside the backend directory:
+
+cd backend
+
+Install the dependencies:
+
+npm install
+
+Create the backend .env file and configure the required environment variables.
+
+Run Prisma migrations:
+
+npx prisma migrate dev
+
+Generate the Prisma Client:
+
+npx prisma generate
+
+Run the database seed:
+
+npx prisma db seed
+
+Start the backend server using the project scripts defined in package.json.
+
+---
+
+## 18. Running the Frontend
+
+Open a second terminal and move to the frontend directory:
+
+cd frontend
+
+Install dependencies:
+
+npm install
+
+Start the Vite development server using the project scripts defined in package.json.
+
+---
+
+## 19. Testing
+
+The backend includes automated tests using Jest and Supertest.
+
+The test suite covers important areas including:
+
+* Authentication
+* Authorization middleware
+* Auth services
+* Products
+* Categories
+* Shopping cart
+* Orders
+* Product images
+* Reviews
+* Activity logs
+* Statistics
+* Email services
+
+Run the backend test suite with:
+
+npm test
+
+A successful test run should report all implemented test suites and tests as passing.
+
+---
+
+## 20. API Testing
+
+The backend exposes REST API endpoints for the application's main features.
+
+The APIs can be tested using tools such as:
+
+* Postman
+* Thunder Client
+
+Protected endpoints require valid authentication.
+
+Admin-only endpoints require an authenticated user with the ADMIN role.
+
+---
+
+## 21. Error Handling
+
+The backend includes centralized error-handling middleware.
+
+Invalid requests, authentication failures, authorization failures, and other application errors are handled through the backend error-handling system.
+
+---
+
+## 22. Security
+
+The application includes several security-related mechanisms:
+
+* Password hashing with bcryptjs
+* JWT authentication
+* Protected routes
+* Role-based authorization
+* Input validation
+* Environment variables for sensitive configuration
+* Centralized error handling
+
+---
+
+## 23. Development Notes
+
+Before running the application, make sure the required services are available:
+
+* PostgreSQL
+* MongoDB
+
+The backend must be configured with valid environment variables before database connections and application features can work correctly.
+
+---
+
+## 24. Project Goal
+
+The goal of this project is to provide a complete full-stack e-commerce platform while demonstrating:
+
+* Frontend development with React
+* REST API development with Node.js and Express
+* Relational database design with PostgreSQL and Prisma
+* NoSQL database usage with MongoDB
+* Authentication and authorization
+* State management
+* API integration
+* Automated testing
+* Professional project organization
+
+---
+
+## 25. Important Notes
+
+Never commit the .env file containing real credentials or secrets.
+
+For evaluation, make sure that:
+
+* PostgreSQL is running
+* MongoDB is running
+* Environment variables are configured
+* Database migrations have been applied
+* Seed data has been created
+* Backend tests pass
+* Frontend starts successfully
+* All required project files are included in the repository
+
+---
+
+## 26. License
+
+This project was created as a full-stack e-commerce application for educational and project evaluation purposes.
+
+## 27. ShopSphere Production/Cloud Deliverables
+
+This repository also contains the Task 1–4 submission artifacts:
+
+* `EYOUTH-30805222701069-ShopSphere-Cloud-Service-Classification.txt`
+* `EYOUTH-30805222701069-ShopSphere-Architecture-Diagram.svg`
+* `k8s/EYOUTH-30805222701069-ShopSphere-MultiCloud.yaml`
+* `EYOUTH-30805222701069-ShopSphere-Architecture-Decision-Record.txt`
+* `EYOUTH-30805222701069-ShopSphere-Rollback-Plan.txt`
+* `EYOUTH-30805222701069-ShopSphere-Project-Links.txt`
+* `serverless-function/api/low-stock-report.js`
+* `.github/workflows/ci-cd.yml`
+
+Production URLs, GitHub secrets, Vercel project IDs, Supabase credentials, MongoDB credentials, and monitoring configuration are intentionally not committed to the repository. They must be configured in the relevant hosting/CI systems.

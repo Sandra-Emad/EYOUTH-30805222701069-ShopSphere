@@ -1,0 +1,23 @@
+SHOPSPHERE – PROJECT LINKS
+Student ID: EYOUTH-30805222701069
+
+Application URL:
+[PASTE THE PUBLIC VERCEL FRONTEND URL HERE]
+
+Review Service URL:
+[PASTE THE PUBLIC REVIEW SERVICE VERCEL URL HERE]
+
+Repository URL:
+[PASTE THE PUBLIC GITHUB REPOSITORY URL HERE]
+
+Backend Health Check:
+[PASTE THE PUBLIC BACKEND URL + /api/health HERE]
+
+Serverless Function:
+[PASTE THE PUBLIC SERVERLESS FUNCTION URL HERE]
+
+Monitoring:
+[PASTE THE UPTIMEROBOT MONITOR URL/DASHBOARD HERE]
+
+Sharing requirement:
+Set this document to “Anyone with the link can view” and verify it from another device/account before submission.

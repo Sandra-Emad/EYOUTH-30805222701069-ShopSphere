@@ -1,6 +1,8 @@
 import {
   getReviewsFromService,
   createReviewInService,
+  updateReviewInService,
+  deleteReviewInService,
 } from "../services/reviewApi.service.js";
 
 export const getByProduct = async (req, res) => {
@@ -63,19 +65,36 @@ export const create = async (req, res) => {
  */
 
 export const update = async (req, res) => {
-  return res.status(501).json({
-    success: false,
-    message:
-      "Review update is handled by the review service.",
-  });
+  try {
+    const result = await updateReviewInService(
+      req.params.reviewId,
+      req.user.userId,
+      req.body
+    );
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Update review through review service error:", error.message);
+    return res.status(error.statusCode || 502).json({
+      success: false,
+      message: error.message || "Review service unavailable",
+    });
+  }
 };
 
 export const remove = async (req, res) => {
-  return res.status(501).json({
-    success: false,
-    message:
-      "Review deletion is handled by the review service.",
-  });
+  try {
+    const result = await deleteReviewInService(
+      req.params.reviewId,
+      req.user.userId
+    );
+    return res.status(200).json(result);
+  } catch (error) {
+    console.error("Delete review through review service error:", error.message);
+    return res.status(error.statusCode || 502).json({
+      success: false,
+      message: error.message || "Review service unavailable",
+    });
+  }
 };
 
 export const getReviews = getByProduct;

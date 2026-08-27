@@ -56,6 +56,27 @@ export const getReviewsFromService = async (
   );
 };
 
+export const updateReviewInService = async (reviewId, userId, data) => {
+  return requestReviewService(
+    `/api/reviews/${reviewId}`,
+    {
+      method: "PATCH",
+      headers: { "x-user-id": String(userId) },
+      body: JSON.stringify(data),
+    }
+  );
+};
+
+export const deleteReviewInService = async (reviewId, userId) => {
+  return requestReviewService(
+    `/api/reviews/${reviewId}`,
+    {
+      method: "DELETE",
+      headers: { "x-user-id": String(userId) },
+    }
+  );
+};
+
 export const createReviewInService = async (
   productId,
   userId,
@@ -76,4 +97,6 @@ export const createReviewInService = async (
 export default {
   getReviewsFromService,
   createReviewInService,
+  updateReviewInService,
+  deleteReviewInService,
 };
