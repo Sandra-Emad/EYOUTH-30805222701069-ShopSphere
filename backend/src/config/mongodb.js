@@ -1,6 +1,34 @@
 import mongoose from "mongoose";
+import dns from "node:dns";
 
 let isConnected = false;
+
+const configureDns = () => {
+  // Only needed for MongoDB Atlas SRV connections.
+  // Local MongoDB does not use SRV DNS.
+  dns.setServers(["8.8.8.8", "1.1.1.1"]);
+};
+
+const getMongoUrl = () => {
+  const isTest =
+    process.env.NODE_ENV === "test" ||
+    process.env.JEST_WORKER_ID !== undefined;
+
+  if (isTest) {
+    return (
+      process.env.TEST_MONGODB_URI ||
+      process.env.TEST_MONGODB_URL ||
+      process.env.MONGODB_TEST_URI ||
+      process.env.MONGODB_URI ||
+      process.env.MONGO_URI
+    );
+  }
+
+  return (
+    process.env.MONGODB_URI ||
+    process.env.MONGO_URI
+  );
+};
 
 export const connectMongoDB = async () => {
   if (
@@ -10,11 +38,7 @@ export const connectMongoDB = async () => {
     return mongoose.connection;
   }
 
-  const mongoUrl =
-    process.env.TEST_MONGODB_URL ||
-    process.env.MONGODB_TEST_URI ||
-    process.env.MONGODB_URI ||
-    process.env.MONGO_URI;
+  const mongoUrl = getMongoUrl();
 
   if (!mongoUrl) {
     throw new Error(
@@ -22,9 +46,13 @@ export const connectMongoDB = async () => {
     );
   }
 
+  if (mongoUrl.startsWith("mongodb+srv://")) {
+    configureDns();
+  }
+
   await mongoose.connect(mongoUrl, {
-    serverSelectionTimeoutMS: 5000,
-    connectTimeoutMS: 5000,
+    serverSelectionTimeoutMS: 10000,
+    connectTimeoutMS: 10000,
   });
 
   isConnected = true;
@@ -33,9 +61,7 @@ export const connectMongoDB = async () => {
 };
 
 export const disconnectMongoDB = async () => {
-  if (
-    mongoose.connection.readyState !== 0
-  ) {
+  if (mongoose.connection.readyState !== 0) {
     await mongoose.disconnect();
   }
 

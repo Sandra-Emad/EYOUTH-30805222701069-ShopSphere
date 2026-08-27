@@ -2,10 +2,23 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-import app from "../src/app.js";
 import connectMongoDB from "../src/config/mongodb.js";
 
 let mongoPromise = null;
+let appPromise = null;
+
+const loadApp = async () => {
+  if (!appPromise) {
+    appPromise = import("../src/app.js")
+      .then(({ default: app }) => app)
+      .catch((error) => {
+        appPromise = null;
+        throw error;
+      });
+  }
+
+  return appPromise;
+};
 
 const connectMongo = async () => {
   if (!mongoPromise) {
@@ -20,6 +33,8 @@ const connectMongo = async () => {
 
 export default async function handler(req, res) {
   try {
+    const app = await loadApp();
+
     await connectMongo();
 
     return app(req, res);

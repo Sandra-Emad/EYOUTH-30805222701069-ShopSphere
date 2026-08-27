@@ -1,7 +1,9 @@
 export default {
   testEnvironment: "node",
 
-  testMatch: ["**/tests/**/*.test.js"],
+  testMatch: ["<rootDir>/tests/**/*.test.js"],
+
+  testPathIgnorePatterns: ["/node_modules/", "/.vercel/"],
 
   setupFilesAfterEnv: ["<rootDir>/tests/setup.js"],
 
@@ -11,4 +13,6 @@ export default {
     "node_modules/",
     "<rootDir>/src/generated/prisma/",
   ],
+
+  clearMocks: true,
 };

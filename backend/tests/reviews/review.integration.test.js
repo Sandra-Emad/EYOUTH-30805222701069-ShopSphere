@@ -6,6 +6,11 @@ import app from "../../src/app.js";
 import prisma from "../../src/config/test-prisma.js";
 import Review from "../../src/models/review.model.js";
 
+import {
+  connectMongoDB,
+  disconnectMongoDB,
+} from "../../src/config/mongodb.js";
+
 const uniqueValue = () =>
   `${Date.now()}_${Math.random()
     .toString(36)
@@ -23,11 +28,7 @@ describe("Review API Integration", () => {
       process.env.JWT_SECRET ||
       "test-jwt-secret";
 
-    if (mongoose.connection.readyState === 0) {
-      await mongoose.connect(
-        process.env.MONGODB_URI
-      );
-    }
+    await connectMongoDB();
 
     await prisma.$connect();
 
@@ -123,9 +124,8 @@ describe("Review API Integration", () => {
     } finally {
       await prisma.$disconnect();
 
-      if (mongoose.connection.readyState !== 0) {
-        await mongoose.connection.close();
-      }
+      await prisma.$disconnect();
+      await disconnectMongoDB();
     }
   }, 30000);
 
