@@ -7,3 +7,6 @@ node_modules/
 
 coverage/
 test-output.txt
+
+.vercel
+.env*
