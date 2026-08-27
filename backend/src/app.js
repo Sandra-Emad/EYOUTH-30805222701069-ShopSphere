@@ -49,6 +49,26 @@ const allowedOrigins = (
   .map((origin) => origin.trim())
   .filter(Boolean);
 
+const isAllowedVercelFrontend = (origin) => {
+  try {
+    const url = new URL(origin);
+
+    if (url.protocol !== "https:") {
+      return false;
+    }
+
+    if (url.hostname === "eyouth-30805222701069-shop-sphere-f.vercel.app") {
+      return true;
+    }
+
+    return /^eyouth-30805222701069-shop-sphere-frontend-[a-z0-9]+\\.vercel\\.app$/i.test(
+      url.hostname
+    );
+  } catch {
+    return false;
+  }
+};
+
 app.use(
   cors({
     origin(origin, callback) {
@@ -59,7 +79,10 @@ app.use(
         return callback(null, true);
       }
 
-      if (allowedOrigins.includes(origin)) {
+      if (
+        allowedOrigins.includes(origin) ||
+        isAllowedVercelFrontend(origin)
+      ) {
         return callback(null, true);
       }
 
