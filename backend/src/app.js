@@ -57,11 +57,11 @@ const isAllowedVercelFrontend = (origin) => {
       return false;
     }
 
-    if (url.hostname === "eyouth-30805222701069-shop-sphere-f.vercel.app") {
+    if (url.hostname === "eyouth-30805222701069-shop-sphere-frontend-fvsoogug6.vercel.app") {
       return true;
     }
 
-    return /^eyouth-30805222701069-shop-sphere-frontend-[a-z0-9]+\\.vercel\\.app$/i.test(
+    return /^eyouth-30805222701069-shop-sphere-frontend-[a-z0-9]+\.vercel\.app$/i.test(
       url.hostname
     );
   } catch {
