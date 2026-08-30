@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { createActivityLog } from "../services/activityLog.service.js";
 
 const MUTATING_METHODS = new Set([
@@ -14,6 +15,25 @@ const MUTATING_METHODS = new Set([
  * event can fire while the MongoDB insert is still pending.
  */
 const pendingActivityLogs = new Set();
+
+const isTestEnvironment = () =>
+  process.env.NODE_ENV === "test" ||
+  process.env.JEST_WORKER_ID !== undefined;
+
+/**
+ * MongoDB connection states:
+ *
+ * 0 = disconnected
+ * 1 = connected
+ * 2 = connecting
+ * 3 = disconnecting
+ *
+ * In tests, don't start a MongoDB operation when there is no
+ * established connection. Otherwise Mongoose may buffer the
+ * operation and keep Jest alive until the buffering timeout.
+ */
+const isMongoConnected = () =>
+  mongoose.connection.readyState === 1;
 
 const getEntity = (path = "") => {
   const value = path
@@ -35,18 +55,22 @@ const getEntity = (path = "") => {
 
 const getAction = (method) => {
   if (method === "POST") return "CREATE";
-  if (method === "PUT" || method === "PATCH") return "UPDATE";
+
+  if (method === "PUT" || method === "PATCH") {
+    return "UPDATE";
+  }
+
   if (method === "DELETE") return "DELETE";
 
   return method;
 };
 
 /**
- * Wait until all activity-log operations that were started by the
- * middleware have finished.
+ * Wait until all activity-log operations that were started by
+ * the middleware have finished.
  *
- * This is used by Jest teardown so MongoDB operations don't continue
- * after the test process has already finished.
+ * This is used by Jest teardown so MongoDB operations don't
+ * continue after the test process has already finished.
  */
 export const waitForActivityLogs = async () => {
   while (pendingActivityLogs.size > 0) {
@@ -62,7 +86,30 @@ const activityLogger = (req, res, next) => {
   }
 
   res.on("finish", () => {
+    /*
+     * No authenticated user means there is no activity to record.
+     * Don't attempt to create an activity log for failed requests.
+     */
     if (!req.user?.userId || res.statusCode >= 500) {
+      return;
+    }
+
+    /*
+     * During Jest runs, MongoDB may intentionally not be running.
+     *
+     * Do NOT call createActivityLog when MongoDB isn't connected.
+     * Otherwise Mongoose buffers the insert for 10 seconds and Jest
+     * reports:
+     *
+     * "Cannot log after tests are done"
+     *
+     * Production behavior is unchanged: when NODE_ENV is not test,
+     * activity logging continues normally.
+     */
+    if (
+      isTestEnvironment() &&
+      !isMongoConnected()
+    ) {
       return;
     }
 
@@ -82,13 +129,18 @@ const activityLogger = (req, res, next) => {
       endpoint: req.originalUrl,
       ipAddress: req.ip || null,
       userAgent: req.get("user-agent") || null,
-    })
-      .catch((error) => {
+    }).catch((error) => {
+      /*
+       * Activity logging must never break the API request.
+       * Log the error only while Jest is still active.
+       */
+      if (!isTestEnvironment()) {
         console.error(
           "Activity log error:",
           error.message
         );
-      });
+      }
+    });
 
     pendingActivityLogs.add(activityLogPromise);
 

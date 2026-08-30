@@ -1,9 +1,27 @@
+import prisma from "../config/prisma.js";
+
 const getReviewServiceUrl = () => {
   const url =
     process.env.REVIEW_SERVICE_URL ||
     "https://eyouth-30805222701069-shopsphere-review-service-fmskkegrc.vercel.app";
 
   return url.replace(/\/+$/, "");
+};
+
+const createError = (message, statusCode) => {
+  const error = new Error(message);
+  error.statusCode = statusCode;
+  return error;
+};
+
+const validateProductId = (productId) => {
+  const id = Number(productId);
+
+  if (!Number.isInteger(id) || id <= 0) {
+    throw createError("Invalid product ID", 400);
+  }
+
+  return id;
 };
 
 const requestReviewService = async (
@@ -30,7 +48,8 @@ const requestReviewService = async (
   } catch {
     data = {
       success: false,
-      message: text || "Invalid response from review service",
+      message:
+        text || "Invalid response from review service",
     };
   }
 
@@ -49,30 +68,57 @@ const requestReviewService = async (
 };
 
 export const getReviewsFromService = async (
-  productId
+  productId,
+  database = prisma
 ) => {
+  const id = validateProductId(productId);
+
+  const product = await database.product.findUnique({
+    where: {
+      id,
+    },
+    select: {
+      id: true,
+    },
+  });
+
+  if (!product) {
+    throw createError("Product not found", 404);
+  }
+
   return requestReviewService(
-    `/api/reviews/products/${productId}`
+    `/api/reviews/products/${id}`
   );
 };
 
-export const updateReviewInService = async (reviewId, userId, data) => {
+export const updateReviewInService = async (
+  reviewId,
+  userId,
+  data
+) => {
   return requestReviewService(
     `/api/reviews/${reviewId}`,
     {
       method: "PATCH",
-      headers: { "x-user-id": String(userId) },
+      headers: {
+        "x-user-id": String(userId),
+      },
       body: JSON.stringify(data),
     }
   );
 };
 
-export const deleteReviewInService = async (reviewId, userId) => {
+export const deleteReviewInService = async (
+  reviewId,
+  userId
+) => {
   return requestReviewService(
     `/api/reviews/${reviewId}`,
     {
       method: "DELETE",
-      headers: { "x-user-id": String(userId) },
+      headers: {
+        "x-user-id": String(userId),
+      },
     }
   );
 };

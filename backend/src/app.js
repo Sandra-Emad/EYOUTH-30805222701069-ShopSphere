@@ -41,48 +41,45 @@ app.use(
    CORS
 ========================= */
 
-const allowedOrigins = (
-  process.env.FRONTEND_URL ||
-  "http://localhost:5173"
-)
+const productionFrontendUrl =
+  "https://eyouth-30805222701069-shop-sphere-f.vercel.app";
+
+const developmentOrigins = [
+  "http://localhost:5173",
+];
+
+const configuredOrigins = (process.env.FRONTEND_URL || "")
   .split(",")
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const isAllowedVercelFrontend = (origin) => {
-  try {
-    const url = new URL(origin);
+const isProduction =
+  process.env.NODE_ENV === "production";
 
-    if (url.protocol !== "https:") {
-      return false;
-    }
-
-    if (url.hostname === "eyouth-30805222701069-shop-sphere-frontend-fvsoogug6.vercel.app") {
-      return true;
-    }
-
-    return /^eyouth-30805222701069-shop-sphere-frontend-[a-z0-9]+\.vercel\.app$/i.test(
-      url.hostname
-    );
-  } catch {
-    return false;
-  }
-};
+const allowedOrigins = isProduction
+  ? [
+      productionFrontendUrl,
+      ...configuredOrigins.filter(
+        (origin) =>
+          origin === productionFrontendUrl
+      ),
+    ]
+  : [
+      ...developmentOrigins,
+      ...configuredOrigins,
+    ];
 
 app.use(
   cors({
     origin(origin, callback) {
-      // Allow requests without an Origin header.
-      // This includes health checks, curl, Postman,
+      // Requests without an Origin header are allowed.
+      // This supports curl, Postman, health checks,
       // server-to-server requests, etc.
       if (!origin) {
         return callback(null, true);
       }
 
-      if (
-        allowedOrigins.includes(origin) ||
-        isAllowedVercelFrontend(origin)
-      ) {
+      if (allowedOrigins.includes(origin)) {
         return callback(null, true);
       }
 
@@ -90,6 +87,7 @@ app.use(
         new Error("CORS origin not allowed")
       );
     },
+
     credentials: true,
   })
 );
@@ -105,7 +103,8 @@ const apiLimiter = rateLimit({
   legacyHeaders: false,
   message: {
     success: false,
-    message: "Too many requests. Please try again later.",
+    message:
+      "Too many requests. Please try again later.",
   },
 });
 
@@ -238,14 +237,9 @@ app.use((req, res) => {
 ========================= */
 
 app.use((err, req, res, next) => {
-  console.error(
-    "Unhandled error:",
-    err
-  );
+  console.error("Unhandled error:", err);
 
-  return res.status(
-    err.statusCode || 500
-  ).json({
+  return res.status(err.statusCode || 500).json({
     success: false,
     message:
       err.message ||

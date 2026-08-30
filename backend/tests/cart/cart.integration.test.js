@@ -7,6 +7,7 @@ import prisma from "../../src/config/test-prisma.js";
 describe("Cart API Integration", () => {
   let user;
   let product;
+  let category;
   let token;
 
   beforeAll(async () => {
@@ -19,7 +20,7 @@ describe("Cart API Integration", () => {
       },
     });
 
-    const category = await prisma.category.create({
+    category = await prisma.category.create({
       data: {
         name: `Cart Integration Category ${Date.now()}`,
       },
@@ -47,41 +48,64 @@ describe("Cart API Integration", () => {
   });
 
   afterAll(async () => {
-    await prisma.cartItem.deleteMany({
-      where: {
-        cart: {
-          userId: user.id,
-        },
-      },
-    });
+    try {
+      /*
+       * Cleanup order matters because of foreign-key constraints:
+       *
+       * CartItem -> Cart
+       * CartItem -> Product
+       * Product  -> Category
+       */
 
-    await prisma.cart.deleteMany({
-      where: {
-        userId: user.id,
-      },
-    });
+      // 1. Remove cart items belonging to this user's cart.
+      if (user?.id) {
+        await prisma.cartItem.deleteMany({
+          where: {
+            cart: {
+              userId: user.id,
+            },
+          },
+        });
+      }
 
-    await prisma.product.deleteMany({
-      where: {
-        id: product.id,
-      },
-    });
+      // 2. Remove the user's cart.
+      if (user?.id) {
+        await prisma.cart.deleteMany({
+          where: {
+            userId: user.id,
+          },
+        });
+      }
 
-    await prisma.category.deleteMany({
-      where: {
-        name: {
-          startsWith: "Cart Integration Category",
-        },
-      },
-    });
+      // 3. Remove the test product.
+      if (product?.id) {
+        await prisma.product.deleteMany({
+          where: {
+            id: product.id,
+          },
+        });
+      }
 
-    await prisma.user.deleteMany({
-      where: {
-        id: user.id,
-      },
-    });
+      // 4. Only now is it safe to remove the test category.
+      if (category?.id) {
+        await prisma.category.deleteMany({
+          where: {
+            id: category.id,
+          },
+        });
+      }
 
-    await prisma.$disconnect();
+      // 5. Finally remove the test user.
+      if (user?.id) {
+        await prisma.user.deleteMany({
+          where: {
+            id: user.id,
+          },
+        });
+      }
+    } finally {
+      await prisma.$disconnect();
+    }
   });
 
   test("should reject unauthenticated cart access", async () => {
