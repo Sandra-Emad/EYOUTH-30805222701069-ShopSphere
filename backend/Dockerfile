@@ -8,7 +8,9 @@ RUN npm ci --ignore-scripts
 
 COPY . .
 
-RUN DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ecommerce_db1" npx prisma generate
+# Prisma only needs a syntactically valid DATABASE_URL during client generation.
+# Production DATABASE_URL is provided securely by the hosting platform.
+RUN DATABASE_URL="postgresql://placeholder:placeholder@localhost:5432/placeholder" npx prisma generate
 
 EXPOSE 5000
 
