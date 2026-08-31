@@ -1,92 +1,183 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="700" viewBox="0 0 1200 700">
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="850" viewBox="0 0 1400 850">
   <defs>
     <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto">
       <path d="M0,0 L10,3 L0,6 Z" fill="#333"/>
     </marker>
   </defs>
 
-  <rect width="1200" height="700" fill="#ffffff"/>
+  <rect width="1400" height="850" fill="#ffffff"/>
 
-  <text x="600" y="55" text-anchor="middle"
+  <text x="700" y="55" text-anchor="middle"
         font-family="Arial" font-size="30" font-weight="bold">
     ShopSphere Production Architecture
   </text>
 
-  <rect x="100" y="180" width="260" height="150" rx="15"
+  <!-- Frontend -->
+  <rect x="60" y="150" width="270" height="160" rx="15"
         fill="#f5f5f5" stroke="#333" stroke-width="3"/>
-  <text x="230" y="225" text-anchor="middle"
+  <text x="195" y="195" text-anchor="middle"
         font-family="Arial" font-size="24" font-weight="bold">
     Vercel Frontend
   </text>
-  <text x="230" y="265" text-anchor="middle"
+  <text x="195" y="235" text-anchor="middle"
         font-family="Arial" font-size="18">
     ShopSphere Web App
   </text>
-  <text x="230" y="295" text-anchor="middle"
+  <text x="195" y="270" text-anchor="middle"
         font-family="Arial" font-size="16">
     Public HTTPS URL
   </text>
 
-  <rect x="470" y="180" width="260" height="150" rx="15"
+  <!-- Backend -->
+  <rect x="400" y="150" width="270" height="160" rx="15"
         fill="#f5f5f5" stroke="#333" stroke-width="3"/>
-  <text x="600" y="225" text-anchor="middle"
+  <text x="535" y="195" text-anchor="middle"
         font-family="Arial" font-size="24" font-weight="bold">
     Vercel Backend
   </text>
-  <text x="600" y="265" text-anchor="middle"
+  <text x="535" y="235" text-anchor="middle"
         font-family="Arial" font-size="18">
     Express REST API
   </text>
-  <text x="600" y="295" text-anchor="middle"
+  <text x="535" y="270" text-anchor="middle"
         font-family="Arial" font-size="16">
     HTTPS + CORS + Helmet
   </text>
 
-  <rect x="840" y="180" width="260" height="150" rx="15"
+  <!-- PostgreSQL -->
+  <rect x="740" y="150" width="270" height="160" rx="15"
         fill="#f5f5f5" stroke="#333" stroke-width="3"/>
-  <text x="970" y="225" text-anchor="middle"
+  <text x="875" y="195" text-anchor="middle"
         font-family="Arial" font-size="24" font-weight="bold">
     Supabase
   </text>
-  <text x="970" y="265" text-anchor="middle"
+  <text x="875" y="235" text-anchor="middle"
         font-family="Arial" font-size="18">
     PostgreSQL Database
   </text>
-  <text x="970" y="295" text-anchor="middle"
+  <text x="875" y="270" text-anchor="middle"
         font-family="Arial" font-size="16">
     Production Database
   </text>
 
-  <line x1="360" y1="255" x2="470" y2="255"
-        stroke="#333" stroke-width="4" marker-end="url(#arrow)"/>
-  <text x="415" y="230" text-anchor="middle"
+  <!-- Review Service -->
+  <rect x="400" y="430" width="270" height="160" rx="15"
+        fill="#f5f5f5" stroke="#333" stroke-width="3"/>
+  <text x="535" y="475" text-anchor="middle"
+        font-family="Arial" font-size="23" font-weight="bold">
+    Review Service
+  </text>
+  <text x="535" y="515" text-anchor="middle"
+        font-family="Arial" font-size="18">
+    Independent REST API
+  </text>
+  <text x="535" y="550" text-anchor="middle"
         font-family="Arial" font-size="16">
+    Independently Deployed
+  </text>
+
+  <!-- MongoDB -->
+  <rect x="740" y="430" width="270" height="160" rx="15"
+        fill="#f5f5f5" stroke="#333" stroke-width="3"/>
+  <text x="875" y="475" text-anchor="middle"
+        font-family="Arial" font-size="24" font-weight="bold">
+    MongoDB
+  </text>
+  <text x="875" y="515" text-anchor="middle"
+        font-family="Arial" font-size="18">
+    Review Data
+  </text>
+  <text x="875" y="550" text-anchor="middle"
+        font-family="Arial" font-size="16">
+    Separate Data Model
+  </text>
+
+  <!-- Serverless -->
+  <rect x="1080" y="150" width="270" height="160" rx="15"
+        fill="#f5f5f5" stroke="#333" stroke-width="3"/>
+  <text x="1215" y="195" text-anchor="middle"
+        font-family="Arial" font-size="23" font-weight="bold">
+    Vercel Serverless
+  </text>
+  <text x="1215" y="235" text-anchor="middle"
+        font-family="Arial" font-size="18">
+    Low-Stock Report
+  </text>
+  <text x="1215" y="270" text-anchor="middle"
+        font-family="Arial" font-size="16">
+    Scheduled Background Workload
+  </text>
+
+  <!-- Frontend -> Backend -->
+  <line x1="330" y1="230" x2="400" y2="230"
+        stroke="#333" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="365" y="205" text-anchor="middle"
+        font-family="Arial" font-size="15">
     HTTPS
   </text>
 
-  <line x1="730" y1="255" x2="840" y2="255"
+  <!-- Backend -> PostgreSQL -->
+  <line x1="670" y1="230" x2="740" y2="230"
         stroke="#333" stroke-width="4" marker-end="url(#arrow)"/>
-  <text x="785" y="230" text-anchor="middle"
-        font-family="Arial" font-size="16">
+  <text x="705" y="205" text-anchor="middle"
+        font-family="Arial" font-size="15">
     PostgreSQL
   </text>
 
-  <rect x="410" y="430" width="380" height="100" rx="15"
-        fill="#fafafa" stroke="#555" stroke-width="2"/>
-  <text x="600" y="470" text-anchor="middle"
-        font-family="Arial" font-size="20" font-weight="bold">
-    Production Traffic Flow
-  </text>
-  <text x="600" y="505" text-anchor="middle"
-        font-family="Arial" font-size="17">
-    User → Frontend → Backend API → Database
+  <!-- Backend -> Review Service -->
+  <line x1="535" y1="310" x2="535" y2="430"
+        stroke="#333" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="555" y="375"
+        font-family="Arial" font-size="15">
+    REST / HTTPS
   </text>
 
-  <line x1="600" y1="330" x2="600" y2="430"
-        stroke="#555" stroke-width="3" stroke-dasharray="8,6"
+  <!-- Review Service -> MongoDB -->
+  <line x1="670" y1="510" x2="740" y2="510"
+        stroke="#333" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="705" y="485" text-anchor="middle"
+        font-family="Arial" font-size="15">
+    MongoDB
+  </text>
+
+  <!-- Serverless -> PostgreSQL -->
+  <line x1="1080" y1="230" x2="1010" y2="230"
+        stroke="#333" stroke-width="4" marker-end="url(#arrow)"/>
+  <text x="1045" y="205" text-anchor="middle"
+        font-family="Arial" font-size="15">
+    Read Catalog
+  </text>
+
+  <!-- Cron label -->
+  <text x="1215" y="350" text-anchor="middle"
+        font-family="Arial" font-size="17" font-weight="bold">
+    Vercel Cron
+  </text>
+  <text x="1215" y="378" text-anchor="middle"
+        font-family="Arial" font-size="15">
+    Scheduled execution
+  </text>
+
+  <line x1="1215" y1="310" x2="1215" y2="330"
+        stroke="#555" stroke-width="3"
+        stroke-dasharray="8,6"
         marker-end="url(#arrow)"/>
 
-  <text x="600" y="620" text-anchor="middle"
+  <!-- Architecture notes -->
+  <rect x="170" y="670" width="1060" height="90" rx="15"
+        fill="#fafafa" stroke="#555" stroke-width="2"/>
+
+  <text x="700" y="705" text-anchor="middle"
+        font-family="Arial" font-size="19" font-weight="bold">
+    Task 3 Modernization
+  </text>
+
+  <text x="700" y="735" text-anchor="middle"
+        font-family="Arial" font-size="16">
+    Main application + independent Review Service + serverless background workload
+  </text>
+
+  <text x="700" y="790" text-anchor="middle"
         font-family="Arial" font-size="16">
     ShopSphere | EYOUTH-30805222701069
   </text>
