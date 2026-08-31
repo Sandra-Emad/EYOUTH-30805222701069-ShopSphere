@@ -1,9 +1,11 @@
 import prisma from "../config/prisma.js";
 
 const getReviewServiceUrl = () => {
-  const url =
-    process.env.REVIEW_SERVICE_URL ||
-    "https://eyouth-30805222701069-shopsphere-review-service-fmskkegrc.vercel.app";
+  const url = process.env.REVIEW_SERVICE_URL;
+
+  if (!url) {
+    throw new Error("REVIEW_SERVICE_URL is not configured");
+  }
 
   return url.replace(/\/+$/, "");
 };
@@ -48,15 +50,13 @@ const requestReviewService = async (
   } catch {
     data = {
       success: false,
-      message:
-        text || "Invalid response from review service",
+      message: text || "Invalid response from review service",
     };
   }
 
   if (!response.ok) {
     const error = new Error(
-      data?.message ||
-        "Review service request failed"
+      data?.message || "Review service request failed"
     );
 
     error.statusCode = response.status;
