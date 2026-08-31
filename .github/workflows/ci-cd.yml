@@ -5,11 +5,17 @@ on:
     branches:
       - main
 
+  pull_request:
+    branches:
+      - main
+
+  workflow_dispatch:
+
 permissions:
   contents: read
 
 concurrency:
-  group: shopsphere-production
+  group: shopsphere-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -118,46 +124,70 @@ jobs:
           TEST_MONGODB_URI: mongodb://127.0.0.1:27017/ecommerce_db1
         run: npm test -- --runInBand
 
-      - name: Install review service dependencies
+      - name: Install review-service dependencies
         working-directory: review-service
         run: npm install
 
-      - name: Install serverless function dependencies
+      - name: Install serverless-function dependencies
         working-directory: serverless-function
         run: npm install
 
   production:
-    name: Production - Verify
+    name: Production - Deploy
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: staging
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - name: Verify production frontend
-        run: |
-          curl --fail --silent --show-error \
-            https://eyouth-30805222701069-shop-sphere-f.vercel.app \
-            > /dev/null
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: Verify production backend health
-        run: |
-          curl --fail --silent --show-error \
-            https://eyouth-30805222701069-shop-sphere.vercel.app/api/health
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
 
-      - name: Verify production review service
-        run: |
-          curl --fail --silent --show-error \
-            https://eyouth-30805222701069-shopsphere-re.vercel.app/api/health
-
-      - name: Verify production serverless function
+      - name: Deploy frontend
         env:
-          CRON_SECRET: ${{ secrets.CRON_SECRET }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
         run: |
-          if [ -n "$CRON_SECRET" ]; then
-            curl --fail --silent --show-error \
-              -H "Authorization: Bearer $CRON_SECRET" \
-              https://shopsphere-low-stock-function.vercel.app/api/low-stock-report
-          else
-            curl --fail --silent --show-error \
-              https://shopsphere-low-stock-function.vercel.app/api/low-stock-report
-          fi
+          npx vercel deploy --prod --yes \
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --project "$VERCEL_PROJECT_ID"
+
+      - name: Deploy backend
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+        run: |
+          npx vercel deploy --prod --yes \
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --project "$VERCEL_PROJECT_ID"
+
+      - name: Deploy review service
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_REVIEW_PROJECT_ID }}
+        run: |
+          npx vercel deploy --prod --yes \
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --project "$VERCEL_PROJECT_ID"
+
+      - name: Deploy serverless function
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SERVERLESS_PROJECT_ID }}
+        run: |
+          npx vercel deploy --prod --yes \
+            --token "$VERCEL_TOKEN" \
+            --scope "$VERCEL_ORG_ID" \
+            --project "$VERCEL_PROJECT_ID"
