@@ -1,4 +1,4 @@
-name: ShopSphere Production CI/CD - Production
+name: ShopSphere CI/CD
 
 on:
   push:
@@ -13,13 +13,66 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  validate:
-    name: Install, test and build
+  development:
+    name: Development - Install and Build
     runs-on: ubuntu-latest
-    environment: production
+    environment: development
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm install
+
+      - name: Build frontend
+        working-directory: frontend
+        env:
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+        run: npm run build
+
+  staging:
+    name: Staging - Install, Migrate, Test and Build
+    needs: development
+    runs-on: ubuntu-latest
+    environment: staging
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: ecommerce_test_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres -d ecommerce_test_db"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+      mongodb:
+        image: mongo:7
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd="mongosh --eval 'db.adminCommand({ ping: 1 })'"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -30,6 +83,7 @@ jobs:
             frontend/package-lock.json
             backend/package-lock.json
             review-service/package-lock.json
+            serverless-function/package-lock.json
 
       - name: Install frontend dependencies
         working-directory: frontend
@@ -43,17 +97,23 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
-        env:
-          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
         run: npm install
+
+      - name: Run Prisma migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test_db
+        run: npx prisma migrate deploy
 
       - name: Test backend
         working-directory: backend
         env:
           NODE_ENV: test
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          DATABASE_URL: ${{ secrets.TEST_DATABASE_URL }}
-          MONGO_URI: ${{ secrets.TEST_MONGODB_URI }}
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test_db
+          TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test_db
+          MONGO_URI: mongodb://127.0.0.1:27017/ecommerce_db1
+          TEST_MONGODB_URI: mongodb://127.0.0.1:27017/ecommerce_db1
         run: npm test -- --runInBand
 
       - name: Install review-service dependencies
@@ -64,14 +124,15 @@ jobs:
         working-directory: serverless-function
         run: npm install
 
-  deploy:
-    name: Deploy production
-    needs: validate
+  production:
+    name: Production - Deploy
+    needs: staging
     runs-on: ubuntu-latest
     environment: production
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -79,13 +140,29 @@ jobs:
           node-version: 24
 
       - name: Deploy frontend
-        run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
+        run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
 
       - name: Deploy backend
-        run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_BACKEND_PROJECT_ID }}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
+        run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
 
       - name: Deploy review service
-        run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_REVIEW_PROJECT_ID }}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_REVIEW_PROJECT_ID }}
+        run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
 
       - name: Deploy serverless function
-        run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_SERVERLESS_PROJECT_ID }}"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SERVERLESS_PROJECT_ID }}
+        run: npx vercel deploy --prod --yes --token "$VERCEL_TOKEN" --scope "$VERCEL_ORG_ID" --project "$VERCEL_PROJECT_ID"
