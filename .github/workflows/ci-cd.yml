@@ -79,17 +79,13 @@ jobs:
           node-version: 24
 
       - name: Deploy frontend
-        working-directory: frontend
         run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}"
 
       - name: Deploy backend
-        working-directory: backend
         run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_BACKEND_PROJECT_ID }}"
 
       - name: Deploy review service
-        working-directory: review-service
         run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_REVIEW_PROJECT_ID }}"
 
       - name: Deploy serverless function
-        working-directory: serverless-function
         run: npx vercel deploy --prod --yes --token "${{ secrets.VERCEL_TOKEN }}" --scope "${{ secrets.VERCEL_ORG_ID }}" --project "${{ secrets.VERCEL_SERVERLESS_PROJECT_ID }}"
