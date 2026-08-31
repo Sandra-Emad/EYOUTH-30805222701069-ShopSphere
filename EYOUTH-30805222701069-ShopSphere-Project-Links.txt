@@ -1,24 +1,23 @@
-# SHOPSPHERE – PROJECT LINKS
+SHOPSPHERE – PROJECT LINKS
+Student ID: EYOUTH-30805222701069
 
-**Student ID:** EYOUTH-30805222701069
-
-## Application URL
+Application URL:
 https://eyouth-30805222701069-shop-sphere-f.vercel.app
 
-## Review Service URL
-https://eyouth-30805222701069-shopsphere-re.vercel.app
+Review Service URL:
+https://eyouth-30805222701069-shopsphere-re.vercel.app/api/health
 
-## Repository URL
+Repository URL:
 https://github.com/Sandra-Emad/EYOUTH-30805222701069-ShopSphere
 
-## Backend Health Check
+Backend Health Check:
 https://eyouth-30805222701069-shop-sphere.vercel.app/api/health
 
-## Serverless Function
-https://shopsphere-low-stock-function.vercel.app
+Serverless Function:
+https://shopsphere-low-stock-function.vercel.app/api/low-stock-report
 
-## Monitoring
-UptimeRobot monitoring configured for the production backend health endpoint.
+Monitoring:
+https://dashboard.uptimerobot.com/monitors/803850238
 
-## Sharing
-This document is intended to be shared as “Anyone with the link can view” for project evaluation.
+Sharing requirement:
+This document must be shared so that anyone with the link can view it.
