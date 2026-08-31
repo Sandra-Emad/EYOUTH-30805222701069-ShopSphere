@@ -1,4 +1,4 @@
-name: ShopSphere Production CI/CD
+name: ShopSphere Production CI/CD - Production
 
 on:
   push:
