@@ -97,6 +97,8 @@ jobs:
 
       - name: Install backend dependencies
         working-directory: backend
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/ecommerce_test_db
         run: npm install
 
       - name: Run Prisma migrations
