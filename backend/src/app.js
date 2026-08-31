@@ -16,6 +16,7 @@ import statisticsRoutes from "./routes/statistics.routes.js";
 
 import { useTestDatabase } from "./middlewares/test-database.middleware.js";
 import activityLogger from "./middlewares/activityLogger.middleware.js";
+import structuredLogger from "./middlewares/structuredLogger.middleware.js";
 
 const app = express();
 
@@ -143,6 +144,7 @@ app.use(
 ========================= */
 
 app.use(activityLogger);
+app.use(structuredLogger);
 
 /* =========================
    Test Database
