@@ -1,18 +1,22 @@
-SHOPSPHERE – ROLLBACK PLAN
-Student ID: EYOUTH-30805222701069
+# SHOPSPHERE – ROLLBACK PLAN
 
-Detection
-UptimeRobot monitors the public backend health endpoint produced in Task 1. A failed health check or an unhealthy production deployment is treated as a failed release.
+**Student ID:** EYOUTH-30805222701069
 
-Rollback
+## Detection
+
+UptimeRobot monitors the public backend health endpoint configured in Task 1. A failed health check or an unhealthy production deployment is treated as a failed release.
+
+## Rollback
+
 1. Confirm the failure in the monitoring dashboard and Vercel Runtime Logs.
-2. Open the ShopSphere Vercel project and identify the last known-good production deployment.
-3. Promote/restore that previous deployment to production.
-4. If the failure is caused by a backend change, restore the previous backend deployment first and verify /api/health.
+2. Open the affected ShopSphere Vercel project and identify the last known-good production deployment.
+3. Promote the last known-good Vercel deployment to production.
+4. If the failure is caused by a backend change, restore the previous backend deployment first and verify `/api/health`.
 5. Verify the frontend public URL and the main customer journey.
 6. Verify the Review Service URL and the serverless function after production is healthy.
 7. Keep the failed deployment available for investigation; do not delete evidence before the incident is understood.
 8. Record the incident and the deployment that was restored.
 
-Success condition
+## Success Condition
+
 The monitored health endpoint returns HTTP 200, the application loads from its public URL, and the core application journey works again.

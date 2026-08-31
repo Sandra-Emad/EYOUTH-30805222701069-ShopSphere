@@ -2,22 +2,13 @@ SHOPSPHERE – PROJECT LINKS
 Student ID: EYOUTH-30805222701069
 
 Application URL:
-[PASTE THE PUBLIC VERCEL FRONTEND URL HERE]
+https://eyouth-30805222701069-shop-sphere-f.vercel.app
 
 Review Service URL:
-[PASTE THE PUBLIC REVIEW SERVICE VERCEL URL HERE]
+https://eyouth-30805222701069-shopsphere-re.vercel.app
 
 Repository URL:
-[PASTE THE PUBLIC GITHUB REPOSITORY URL HERE]
-
-Backend Health Check:
-[PASTE THE PUBLIC BACKEND URL + /api/health HERE]
-
-Serverless Function:
-[PASTE THE PUBLIC SERVERLESS FUNCTION URL HERE]
-
-Monitoring:
-[PASTE THE UPTIMEROBOT MONITOR URL/DASHBOARD HERE]
+https://github.com/Sandra-Emad/EYOUTH-30805222701069-ShopSphere
 
 Sharing requirement:
-Set this document to “Anyone with the link can view” and verify it from another device/account before submission.
+This document must be shared so that anyone with the link can view it.
