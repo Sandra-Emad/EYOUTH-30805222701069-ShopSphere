@@ -4,18 +4,15 @@ on:
   push:
     branches:
       - main
-
   pull_request:
     branches:
       - main
-
-  workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: shopsphere-${{ github.ref }}
+  group: shopsphere-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -133,8 +130,7 @@ jobs:
         run: npm install
 
   production:
-    name: Production - Deploy
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    name: Production - Validate Existing Deployments
     needs: staging
     runs-on: ubuntu-latest
     environment: production
@@ -143,51 +139,71 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 24
-
-      - name: Deploy frontend
+      - name: Validate production frontend
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
+          FRONTEND_URL: https://eyouth-30805222701069-shop-sphere-f.vercel.app
         run: |
-          npx vercel deploy --prod --yes \
-            --token "$VERCEL_TOKEN" \
-            --scope "$VERCEL_ORG_ID" \
-            --project "$VERCEL_PROJECT_ID"
+          set -e
+          echo "Checking production frontend..."
+          status=$(curl -L -s -o /dev/null -w "%{http_code}" "$FRONTEND_URL")
+          echo "Frontend HTTP status: $status"
 
-      - name: Deploy backend
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
-        run: |
-          npx vercel deploy --prod --yes \
-            --token "$VERCEL_TOKEN" \
-            --scope "$VERCEL_ORG_ID" \
-            --project "$VERCEL_PROJECT_ID"
+          if [ "$status" -lt 200 ] || [ "$status" -ge 400 ]; then
+            echo "Production frontend validation failed."
+            exit 1
+          fi
 
-      - name: Deploy review service
+      - name: Validate production backend health
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_REVIEW_PROJECT_ID }}
+          BACKEND_HEALTH_URL: https://eyouth-30805222701069-shop-sphere.vercel.app/api/health
         run: |
-          npx vercel deploy --prod --yes \
-            --token "$VERCEL_TOKEN" \
-            --scope "$VERCEL_ORG_ID" \
-            --project "$VERCEL_PROJECT_ID"
+          set -e
+          echo "Checking production backend health..."
+          status=$(curl -L -s -o /dev/null -w "%{http_code}" "$BACKEND_HEALTH_URL")
+          echo "Backend health HTTP status: $status"
 
-      - name: Deploy serverless function
+          if [ "$status" -ne 200 ]; then
+            echo "Production backend health check failed."
+            exit 1
+          fi
+
+      - name: Validate production review service
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SERVERLESS_PROJECT_ID }}
+          REVIEW_HEALTH_URL: https://eyouth-30805222701069-shopsphere-re.vercel.app/api/health
         run: |
-          npx vercel deploy --prod --yes \
-            --token "$VERCEL_TOKEN" \
-            --scope "$VERCEL_ORG_ID" \
-            --project "$VERCEL_PROJECT_ID"
+          set -e
+          echo "Checking production review service..."
+          status=$(curl -L -s -o /dev/null -w "%{http_code}" "$REVIEW_HEALTH_URL")
+          echo "Review service HTTP status: $status"
+
+          if [ "$status" -ne 200 ]; then
+            echo "Production review service validation failed."
+            exit 1
+          fi
+
+      - name: Validate production serverless function endpoint
+        env:
+          SERVERLESS_URL: https://shopsphere-low-stock-function.vercel.app/api/low-stock-report
+        run: |
+          set -e
+          echo "Checking production serverless function endpoint..."
+          status=$(curl -L -s -o /dev/null -w "%{http_code}" "$SERVERLESS_URL")
+          echo "Serverless endpoint HTTP status: $status"
+
+          if [ "$status" -ne 200 ] && [ "$status" -ne 401 ] && [ "$status" -ne 403 ]; then
+            echo "Production serverless endpoint is not reachable."
+            exit 1
+          fi
+
+          echo "Serverless endpoint is reachable."
+          echo "401/403 are accepted here because the endpoint may require CRON_SECRET authorization."
+
+      - name: Production validation summary
+        run: |
+          echo "Production validation completed successfully."
+          echo "Existing Task 1 production deployments are reachable."
+          echo "Frontend: https://eyouth-30805222701069-shop-sphere-f.vercel.app"
+          echo "Backend: https://eyouth-30805222701069-shop-sphere.vercel.app/api/health"
+          echo "Review Service: https://eyouth-30805222701069-shopsphere-re.vercel.app/api/health"
+          echo "Serverless: https://shopsphere-low-stock-function.vercel.app/api/low-stock-report"
+          echo "New Vercel deployments are intentionally not created by this validation job."
