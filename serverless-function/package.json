@@ -4,8 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "vercel dev",
-    "start": "vercel dev"
+    "start": "vercel dev",
+    "build": "echo 'Vercel serverless function build complete'"
   },
   "dependencies": {
     "pg": "^8.23.0"
