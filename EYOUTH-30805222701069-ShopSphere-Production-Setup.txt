@@ -1,105 +1,325 @@
 SHOPSPHERE – PRODUCTION SETUP CHECKLIST
 Student ID: EYOUTH-30805222701069
 
-Use this document after extracting the ZIP. It is a setup checklist; replace every [PLACEHOLDER] with your real values.
+This document is the production and Task 4 setup checklist for ShopSphere.
+Use it after extracting the project ZIP and before final submission.
+Never place real passwords, tokens, connection strings, JWT secrets, or other credentials in this document or in the Git repository.
 
+============================================================
 1. LOCAL INSTALL
+============================================================
+
 Open Git Bash in the project root:
-  cd backend && npm install
-  cd ../frontend && npm install
-  cd ../review-service && npm install
-  cd ../serverless-function && npm install
 
+cd backend && npm install
+cd ../frontend && npm install
+cd ../review-service && npm install
+cd ../serverless-function && npm install
+
+
+============================================================
 2. LOCAL ENVIRONMENT FILES
-Copy:
-  backend/.env.example -> backend/.env
-  frontend/.env.example -> frontend/.env
-  review-service/.env.example -> review-service/.env
-  serverless-function/.env.example -> serverless-function/.env
+============================================================
 
-Put real local PostgreSQL, MongoDB and JWT values in the files. Never commit them.
+Copy the example environment files:
 
+backend/.env.example -> backend/.env
+frontend/.env.example -> frontend/.env
+review-service/.env.example -> review-service/.env
+serverless-function/.env.example -> serverless-function/.env
+
+Put real local PostgreSQL, MongoDB, JWT, SMTP and other required local values
+only in the local .env files.
+
+Never commit real .env files or credentials to Git.
+
+
+============================================================
 3. DATABASE
-For production, create PostgreSQL on Supabase and MongoDB for the Review Service.
-Set the production DATABASE_URL to Supabase.
-Set MONGODB_URI for the independently deployed Review Service.
-Run Prisma migrations against production before using the deployed backend:
-  cd backend
-  npx prisma migrate deploy
+============================================================
 
+Production PostgreSQL is hosted on Supabase.
+
+Production MongoDB is used by the independently deployed Review Service.
+
+Production backend:
+DATABASE_URL = [SUPABASE POSTGRES CONNECTION STRING]
+MONGODB_URI = [REVIEW SERVICE MONGODB CONNECTION STRING]
+
+Run Prisma migrations against the production database when required:
+
+cd backend
+npx prisma migrate deploy
+
+The production database must be configured through Vercel environment
+variables and must never be stored in the repository.
+
+
+============================================================
 4. VERCEL PROJECTS
-Create four Vercel projects from:
-  frontend/
-  backend/
-  review-service/
-  serverless-function/
+============================================================
 
-Configure each project's Production environment variables. Do not place production secrets in Git.
+ShopSphere uses four independently deployed Vercel projects:
 
-Backend production variables:
-  NODE_ENV=production
-  DATABASE_URL=[SUPABASE POSTGRES CONNECTION STRING]
-  MONGODB_URI=[MONGODB ATLAS CONNECTION STRING]
-  JWT_SECRET=[LONG RANDOM SECRET]
-  FRONTEND_URL=[PUBLIC FRONTEND URL]
-  REVIEW_SERVICE_URL=[PUBLIC REVIEW SERVICE URL]
-  Email variables if email is enabled
+1. Frontend
+   Source directory:
+   frontend/
+
+2. Backend
+   Source directory:
+   backend/
+
+3. Review Service
+   Source directory:
+   review-service/
+
+4. Serverless Function
+   Source directory:
+   serverless-function/
+
+Configure the Production environment variables inside the corresponding
+Vercel projects.
+
+Do not put production secrets in GitHub workflow files or source code.
+
+
+BACKEND PRODUCTION VARIABLES
+
+NODE_ENV=production
+DATABASE_URL=[SUPABASE POSTGRES CONNECTION STRING]
+MONGODB_URI=[MONGODB CONNECTION STRING]
+JWT_SECRET=[LONG RANDOM SECRET]
+FRONTEND_URL=[PUBLIC FRONTEND URL]
+REVIEW_SERVICE_URL=[PUBLIC REVIEW SERVICE URL]
+
+Email variables, when email functionality is enabled:
+
+SMTP_HOST=[SMTP HOST]
+SMTP_PORT=[SMTP PORT]
+SMTP_USER=[SMTP USER]
+SMTP_PASS=[SMTP PASSWORD]
+SMTP_FROM=[SMTP FROM ADDRESS]
+
+
+FRONTEND PRODUCTION VARIABLES
+
+VITE_API_URL=[PUBLIC BACKEND URL]/api
+
+
+REVIEW SERVICE PRODUCTION VARIABLES
+
+NODE_ENV=production
+MONGODB_URI=[REVIEW SERVICE MONGODB CONNECTION STRING]
+
+
+SERVERLESS FUNCTION PRODUCTION VARIABLES
+
+DATABASE_URL=[SUPABASE POSTGRES CONNECTION STRING]
+CRON_SECRET=[LONG RANDOM SECRET]
+LOW_STOCK_THRESHOLD=5
+
+
+============================================================
+5. DEPLOYMENT VERIFICATION
+============================================================
+
+Each Vercel project must be deployed and verified.
+
+Verify the following endpoints:
+
+Backend:
+[PUBLIC BACKEND URL]/api/health
 
 Frontend:
-  VITE_API_URL=[PUBLIC BACKEND URL]/api
+[PUBLIC FRONTEND URL]
 
 Review Service:
-  NODE_ENV=production
-  MONGODB_URI=[REVIEW MONGODB CONNECTION STRING]
+[PUBLIC REVIEW SERVICE URL]/api/health
 
 Serverless Function:
-  DATABASE_URL=[SUPABASE POSTGRES CONNECTION STRING]
-  CRON_SECRET=[LONG RANDOM SECRET]
-  LOW_STOCK_THRESHOLD=5
+[PUBLIC SERVERLESS FUNCTION URL]/api/low-stock-report
 
-5. DEPLOY ONCE MANUALLY
-Deploy each project once from its directory using Vercel CLI, or connect each project to GitHub.
-After deployment, verify:
-  [BACKEND]/api/health
-  [FRONTEND]
-  [REVIEW SERVICE]/api/health
-  [SERVERLESS]/api/low-stock-report (with its authorization when CRON_SECRET is configured)
+If CRON_SECRET authorization is configured, the serverless endpoint must
+be called with the required authorization.
 
-6. GITHUB ACTIONS
-Create a GitHub repository named:
-  EYOUTH-30805222701069-ShopSphere
+All production URLs must use HTTPS.
 
-Add these GitHub Actions secrets:
-  VERCEL_TOKEN
-  VERCEL_ORG_ID
-  VERCEL_FRONTEND_PROJECT_ID
-  VERCEL_BACKEND_PROJECT_ID
-  VERCEL_REVIEW_PROJECT_ID
-  VERCEL_SERVERLESS_PROJECT_ID
-  JWT_SECRET
-  TEST_DATABASE_URL
-  TEST_MONGODB_URI
 
-Add this repository variable:
-  VITE_API_URL=[PUBLIC BACKEND URL]/api
+============================================================
+6. GITHUB ACTIONS CI/CD
+============================================================
 
-Create GitHub Environments named:
-  development
-  staging
-  production
+Repository:
 
-Keep environment variables separate for each environment. The workflow deploys only after the validation job succeeds.
+EYOUTH-30805222701069-ShopSphere
 
-7. BRANCH PROTECTION
-Protect main so a pull request/merge cannot enter main until the required CI/CD status check succeeds.
+The CI/CD workflow is:
 
-8. MONITORING
-Create an UptimeRobot HTTP monitor for:
-  [PUBLIC BACKEND URL]/api/health
-Verify that it reports UP.
+.github/workflows/ci-cd.yml
 
-9. FINAL RUBRIC CHECK
-Task 1: public frontend + backend, Supabase reads/writes, no repository secrets, HTTPS/CORS/Helmet/rate limit active, health monitor UP.
-Task 2: architecture diagram, service classification, both Kubernetes namespaces, pods/services, port-forward responses, namespace isolation.
-Task 3: independently deployed Review Service, REST communication, working end-to-end app, deployed serverless function, one-page ADR.
-Task 4: development/staging/production environments, successful install/build/deploy workflow, GitHub secrets, protected main, structured logs, one-page rollback plan, shareable links document.
+The pipeline contains three GitHub Actions environments:
+
+development
+staging
+production
+
+
+DEVELOPMENT
+
+The development job:
+
+- checks out the repository
+- installs frontend dependencies
+- builds the frontend
+- validates the frontend build
+
+Environment:
+development
+
+
+STAGING
+
+The staging job runs after development succeeds.
+
+It:
+
+- starts PostgreSQL for testing
+- starts MongoDB for testing
+- installs frontend dependencies
+- builds the frontend
+- installs backend dependencies
+- provides the test DATABASE_URL during Prisma installation
+- runs Prisma migrations against the test PostgreSQL database
+- runs the backend test suite
+- installs Review Service dependencies
+- installs Serverless Function dependencies
+
+Environment:
+staging
+
+
+PRODUCTION
+
+The production job runs after staging succeeds.
+
+It deploys:
+
+- Frontend
+- Backend
+- Review Service
+- Serverless Function
+
+Environment:
+production
+
+
+============================================================
+7. GITHUB SECRETS AND VARIABLES
+============================================================
+
+Credentials must be stored as GitHub Actions secrets and must never be
+written directly into the workflow.
+
+Required production deployment secrets:
+
+VERCEL_TOKEN
+VERCEL_ORG_ID
+VERCEL_FRONTEND_PROJECT_ID
+VERCEL_BACKEND_PROJECT_ID
+VERCEL_REVIEW_PROJECT_ID
+VERCEL_SERVERLESS_PROJECT_ID
+
+
+Staging/test secret:
+
+JWT_SECRET
+
+
+The staging test database and MongoDB values are local CI service values
+defined by the workflow and are not production credentials.
+
+The repository/workflow variable used by the frontend build is:
+
+VITE_API_URL=[PUBLIC BACKEND URL]/api
+
+
+No real credentials should appear in:
+
+- ci-cd.yml
+- source code
+- README files
+- documentation
+- committed .env files
+- GitHub Actions logs
+
+
+============================================================
+8. GITHUB ENVIRONMENTS
+============================================================
+
+The repository contains these GitHub Environments:
+
+development
+staging
+production
+
+The workflow explicitly assigns jobs to these environments.
+
+Environment-specific configuration is kept separate.
+
+Development:
+- Frontend build configuration
+
+Staging:
+- Test/validation configuration
+- JWT_SECRET when required by backend tests
+
+Production:
+- Production deployment credentials and deployment configuration
+
+
+============================================================
+9. CI/CD ACCEPTANCE CRITERION
+============================================================
+
+The CI/CD pipeline follows this sequence:
+
+development
+    |
+    v
+staging
+    |
+    v
+production
+
+Production deployment is not attempted until the validation stage succeeds.
+
+The workflow uses GitHub Secrets for credentials.
+
+Credentials are not hard-coded into the workflow.
+
+The workflow does not print credential values.
+
+The production deployment is performed through Vercel using the configured
+Vercel project IDs.
+
+
+============================================================
+10. BRANCH PROTECTION
+============================================================
+
+The main branch is protected.
+
+Direct pushes to main are not allowed when the protection rule requires a
+pull request.
+
+Changes are submitted through a Pull Request and merged into main only
+after the configured branch protection requirements are satisfied.
+
+The branch protection rule applies to:
+
+main
+
+The repository uses the following protection requirement:
+
+Require a pull request
